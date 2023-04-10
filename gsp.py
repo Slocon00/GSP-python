@@ -32,8 +32,62 @@ class GSP:
 
         self.print_frequent_sequences(output_path)
 
-    def generate_candidates(self):
-        pass
+        k = 2
+        """Loop until there are no more frequent k-sequences"""
+        # while self.frequent_sequences:
+        self.candidate_sequences.clear()
+        self.generate_candidates(k)
+
+    def generate_candidates(self, k):
+        """Generate all candidate k-sequences from frequent k-1-sequences"""
+        if k == 2:
+            frequent_items = []
+            for value in self.frequent_sequences.values():
+                if value:
+                    frequent_items.extend(value)
+
+            for i in range(len(frequent_items)):
+                for j in range(i, len(frequent_items)):
+                    sequence1 = frequent_items[i]
+                    sequence2 = frequent_items[j]
+                    item1 = sequence1.itemsets[0][0]
+                    item2 = sequence2.itemsets[0][0]
+
+                    """Adds candidate [[item1], [item2]]"""
+                    new_candidate1 = Sequence()
+                    new_candidate1.itemsets.append([item1])
+                    new_candidate1.itemsets.append([item2])
+                    new_candidate1.set_of_indexes = \
+                        sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+                    self.candidate_sequences.append(new_candidate1)
+
+                    """If the two items are different, add two more candidates:
+                    [[item2], [item1]] and [[item1, item2]] (or [[item2, item1]])
+                    """
+                    if item1 != item2:
+                        new_candidate2 = Sequence()
+                        new_candidate3 = Sequence()
+
+                        """Adds candidate [[item2], [item1]]"""
+                        new_candidate2.itemsets.append([item2])
+                        new_candidate2.itemsets.append([item1])
+                        new_candidate2.set_of_indexes = \
+                            sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+                        self.candidate_sequences.append(new_candidate2)
+
+                        """Adds [[item1, item2]] or [[item2, item1]], depending
+                        on which is greater than the other
+                        """
+                        if item1 < item2:
+                            new_candidate3.itemsets.append([item1, item2])
+                        else:
+                            new_candidate3.itemsets.append([item2, item1])
+                        new_candidate3.set_of_indexes = \
+                            sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+                        self.candidate_sequences.append(new_candidate3)
+
+        else:
+            pass
 
     def prune_candidates(self):
         pass
