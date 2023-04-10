@@ -30,6 +30,8 @@ class GSP:
             if support < minsup:
                 self.frequent_sequences[item].clear()
 
+        self.print_frequent_sequences(output_path)
+
     def generate_candidates(self):
         pass
 
@@ -72,6 +74,15 @@ class GSP:
                 self.frequent_sequences[item][0].set_of_indexes.add(index)
 
         return True
+
+    def print_frequent_sequences(self, output_path):
+        """Print current frequent sequences to output file"""
+        content = ""
+        for sequence_list in self.frequent_sequences.values():
+            for sequence in sequence_list:
+                content += f"{sequence.itemsets} : {len(sequence.set_of_indexes)}\n"
+
+        output_path.write_text(content)
 
 
 class Sequence:
