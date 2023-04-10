@@ -13,6 +13,16 @@ class GSP:
         if not self.load_db(input_filename):
             return
 
+        output_path = Path(output_filename)
+        if output_path.exists():
+            print("File", output_filename, "already exists, want to proceed? [Y/N]")
+            answer = ""
+            while (answer != "Y") & (answer != "N"):
+                answer = input()
+
+            if answer == "N":
+                return
+
         """Find all frequent 1-sequences"""
         for item in self.frequent_sequences:
             support_count = len(self.frequent_sequences[item][0].set_of_indexes)
