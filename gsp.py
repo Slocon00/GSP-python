@@ -25,38 +25,19 @@ class GSP:
                 return
 
         """Find all frequent 1-sequences"""
-        for item in self.frequent_sequences:
-            support_count = len(self.frequent_sequences[item][0].set_of_indexes)
+        for event in self.frequent_sequences:
+            support_count = len(self.frequent_sequences[event][0].set_of_indexes)
             support = support_count / len(self.db)
             if support < minsup:
-                self.frequent_sequences[item].clear()
-
-        self.print_frequent_sequences(output_path)
+                self.frequent_sequences[event].clear()
 
         k = 2
         """Loop until there are no more frequent k-sequences"""
         # while self.frequent_sequences:
+        self.print_frequent_sequences(output_path)
+
         self.candidate_sequences.clear()
         self.generate_candidates(k)
-
-        for item in self.frequent_sequences:
-            self.frequent_sequences[item].clear()
-        for seq in self.candidate_sequences:
-            self.frequent_sequences[seq.itemsets[0][0]].append(seq)
-        self.candidate_sequences.clear()
-        self.generate_candidates(3)
-
-        for item in self.frequent_sequences:
-            self.frequent_sequences[item].clear()
-        for seq in self.candidate_sequences:
-            self.frequent_sequences[seq.itemsets[0][0]].append(seq)
-        self.candidate_sequences.clear()
-        self.generate_candidates(4)
-
-        for item in self.frequent_sequences:
-            self.frequent_sequences[item].clear()
-        for seq in self.candidate_sequences:
-            self.frequent_sequences[seq.itemsets[0][0]].append(seq)
 
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
@@ -70,54 +51,54 @@ class GSP:
                 for j in range(i, len(frequent_sequences_list)):
                     sequence1 = frequent_sequences_list[i]
                     sequence2 = frequent_sequences_list[j]
-                    item1 = sequence1.itemsets[0][0]
-                    item2 = sequence2.itemsets[0][0]
+                    event1 = sequence1.elements[0][0]
+                    event2 = sequence2.elements[0][0]
 
-                    """Adds candidate [[item1], [item2]]"""
+                    """Adds candidate [[event1], [event2]]"""
                     new_candidate1 = Sequence()
-                    new_candidate1.itemsets.append([item1])
-                    new_candidate1.itemsets.append([item2])
+                    new_candidate1.elements.append([event1])
+                    new_candidate1.elements.append([event2])
                     new_candidate1.set_of_indexes = \
                         sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                     self.candidate_sequences.append(new_candidate1)
 
-                    """If the two items are different, add two more candidates:
-                    [[item2], [item1]] and [[item1, item2]] (or [[item2, item1]])
+                    """If the two events are different, add two more candidates:
+                    [[event2], [event1]] and [[event1, event2]] (or [[event2, event1]])
                     """
-                    if item1 != item2:
+                    if event1 != event2:
                         new_candidate2 = Sequence()
                         new_candidate3 = Sequence()
 
-                        """Adds candidate [[item2], [item1]]"""
-                        new_candidate2.itemsets.append([item2])
-                        new_candidate2.itemsets.append([item1])
+                        """Adds candidate [[event2], [event1]]"""
+                        new_candidate2.elements.append([event2])
+                        new_candidate2.elements.append([event1])
                         new_candidate2.set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                         self.candidate_sequences.append(new_candidate2)
 
-                        """Adds [[item1, item2]] or [[item2, item1]], depending
+                        """Adds [[event1, event2]] or [[event2, event1]], depending
                         on which is greater than the other
                         """
-                        if item1 < item2:
-                            new_candidate3.itemsets.append([item1, item2])
+                        if event1 < event2:
+                            new_candidate3.elements.append([event1, event2])
                         else:
-                            new_candidate3.itemsets.append([item2, item1])
+                            new_candidate3.elements.append([event2, event1])
                         new_candidate3.set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                         self.candidate_sequences.append(new_candidate3)
         else:
             for sequence1 in frequent_sequences_list:
-                if len(sequence1.itemsets[0]) > 1:
+                if len(sequence1.elements[0]) > 1:
                     istart = 0
                     jstart = 1
-                    key = sequence1.itemsets[0][1]
+                    key = sequence1.elements[0][1]
                 else:
-                    """If the first itemset has only one item, pick the first
-                    item from the second itemset
+                    """If the first element has only one event, pick the first
+                    event from the second element
                     """
                     istart = 1
                     jstart = 0
-                    key = sequence1.itemsets[1][0]
+                    key = sequence1.elements[1][0]
 
                 """Only the sequences that could potentially be merged with the
                 current one get picked
@@ -125,38 +106,36 @@ class GSP:
                 mergeable_candidates = self.frequent_sequences[key]
 
                 for sequence2 in mergeable_candidates:
-                    print(sequence1.itemsets, "con", sequence2.itemsets)
 
                     if self.check_if_mergeable(sequence1, sequence2, istart, jstart):
                         new_candidate = Sequence()
-                        new_candidate.itemsets = deepcopy(sequence1.itemsets)
+                        new_candidate.elements = deepcopy(sequence1.elements)
 
-                        len_of_snd = len(sequence2.itemsets)
+                        len_of_snd = len(sequence2.elements)
 
-                        if len(sequence2.itemsets[len_of_snd - 1]) == 1:
-                            new_candidate.itemsets.append(deepcopy(sequence2.itemsets[len_of_snd - 1]))
+                        if len(sequence2.elements[len_of_snd - 1]) == 1:
+                            new_candidate.elements.append(deepcopy(sequence2.elements[len_of_snd - 1]))
                         else:
-                            new_candidate.itemsets[len(new_candidate.itemsets) - 1].append(
-                                sequence2.itemsets[len_of_snd - 1][len(sequence2.itemsets[len_of_snd - 1]) - 1])
+                            new_candidate.elements[len(new_candidate.elements) - 1].append(
+                                sequence2.elements[len_of_snd - 1][len(sequence2.elements[len_of_snd - 1]) - 1])
 
                         new_candidate.set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                         self.candidate_sequences.append(new_candidate)
-                        print("produce", new_candidate.itemsets)
 
     def check_if_mergeable(self, sequence1, sequence2, i, j):
         """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
         candidate k-sequence"""
         m = 0
         n = 0
-        while i < len(sequence1.itemsets):
-            while (j < len(sequence1.itemsets[i])) & (n < len(sequence2.itemsets[m])):
-                if sequence1.itemsets[i][j] != sequence2.itemsets[m][n]:
+        while i < len(sequence1.elements):
+            while (j < len(sequence1.elements[i])) & (n < len(sequence2.elements[m])):
+                if sequence1.elements[i][j] != sequence2.elements[m][n]:
                     return False
                 j += 1
                 n += 1
-            if (j != len(sequence1.itemsets[i])) | \
-                    ((n != len(sequence2.itemsets[m])) & (i != len(sequence1.itemsets) - 1)):
+            if (j != len(sequence1.elements[i])) | \
+                    ((n != len(sequence2.elements[m])) & (i != len(sequence1.elements) - 1)):
                 return False
             j = 0
             n = 0
@@ -193,14 +172,14 @@ class GSP:
                 sequence.append(element)
                 element = []
             else:
-                """Character is an item"""
-                item = int(char)
-                element.append(item)
+                """Character is an event"""
+                event = int(char)
+                element.append(event)
 
-                if item not in self.frequent_sequences:
-                    self.frequent_sequences[item] = [Sequence()]
-                    self.frequent_sequences[item][0].itemsets.append([item])
-                self.frequent_sequences[item][0].set_of_indexes.add(index)
+                if event not in self.frequent_sequences:
+                    self.frequent_sequences[event] = [Sequence()]
+                    self.frequent_sequences[event][0].elements.append([event])
+                self.frequent_sequences[event][0].set_of_indexes.add(index)
 
         return True
 
@@ -209,7 +188,7 @@ class GSP:
         content = ""
         for sequence_list in self.frequent_sequences.values():
             for sequence in sequence_list:
-                content += f"{sequence.itemsets} : {len(sequence.set_of_indexes)}\n"
+                content += f"{sequence.elements} : {len(sequence.set_of_indexes)}\n"
 
         output_path.write_text(content)
 
@@ -217,5 +196,5 @@ class GSP:
 class Sequence:
 
     def __init__(self):
-        self.itemsets = []
+        self.elements = []
         self.set_of_indexes = set()
