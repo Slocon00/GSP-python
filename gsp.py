@@ -1,4 +1,5 @@
 from pathlib import Path
+from copy import deepcopy
 
 
 class GSP:
@@ -38,18 +39,37 @@ class GSP:
         self.candidate_sequences.clear()
         self.generate_candidates(k)
 
+        for item in self.frequent_sequences:
+            self.frequent_sequences[item].clear()
+        for seq in self.candidate_sequences:
+            self.frequent_sequences[seq.itemsets[0][0]].append(seq)
+        self.candidate_sequences.clear()
+        self.generate_candidates(3)
+
+        for item in self.frequent_sequences:
+            self.frequent_sequences[item].clear()
+        for seq in self.candidate_sequences:
+            self.frequent_sequences[seq.itemsets[0][0]].append(seq)
+        self.candidate_sequences.clear()
+        self.generate_candidates(4)
+
+        for item in self.frequent_sequences:
+            self.frequent_sequences[item].clear()
+        for seq in self.candidate_sequences:
+            self.frequent_sequences[seq.itemsets[0][0]].append(seq)
+
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
-        if k == 2:
-            frequent_items = []
-            for value in self.frequent_sequences.values():
-                if value:
-                    frequent_items.extend(value)
+        frequent_sequences_list = []
+        for value in self.frequent_sequences.values():
+            if value:
+                frequent_sequences_list.extend(value)
 
-            for i in range(len(frequent_items)):
-                for j in range(i, len(frequent_items)):
-                    sequence1 = frequent_items[i]
-                    sequence2 = frequent_items[j]
+        if k == 2:
+            for i in range(len(frequent_sequences_list)):
+                for j in range(i, len(frequent_sequences_list)):
+                    sequence1 = frequent_sequences_list[i]
+                    sequence2 = frequent_sequences_list[j]
                     item1 = sequence1.itemsets[0][0]
                     item2 = sequence2.itemsets[0][0]
 
@@ -85,9 +105,64 @@ class GSP:
                         new_candidate3.set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                         self.candidate_sequences.append(new_candidate3)
-
         else:
-            pass
+            for sequence1 in frequent_sequences_list:
+                if len(sequence1.itemsets[0]) > 1:
+                    istart = 0
+                    jstart = 1
+                    key = sequence1.itemsets[0][1]
+                else:
+                    """If the first itemset has only one item, pick the first
+                    item from the second itemset
+                    """
+                    istart = 1
+                    jstart = 0
+                    key = sequence1.itemsets[1][0]
+
+                """Only the sequences that could potentially be merged with the
+                current one get picked
+                """
+                mergeable_candidates = self.frequent_sequences[key]
+
+                for sequence2 in mergeable_candidates:
+                    print(sequence1.itemsets, "con", sequence2.itemsets)
+
+                    if self.check_if_mergeable(sequence1, sequence2, istart, jstart):
+                        new_candidate = Sequence()
+                        new_candidate.itemsets = deepcopy(sequence1.itemsets)
+
+                        len_of_snd = len(sequence2.itemsets)
+
+                        if len(sequence2.itemsets[len_of_snd - 1]) == 1:
+                            new_candidate.itemsets.append(deepcopy(sequence2.itemsets[len_of_snd - 1]))
+                        else:
+                            new_candidate.itemsets[len(new_candidate.itemsets) - 1].append(
+                                sequence2.itemsets[len_of_snd - 1][len(sequence2.itemsets[len_of_snd - 1]) - 1])
+
+                        new_candidate.set_of_indexes = \
+                            sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+                        self.candidate_sequences.append(new_candidate)
+                        print("produce", new_candidate.itemsets)
+
+    def check_if_mergeable(self, sequence1, sequence2, i, j):
+        """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
+        candidate k-sequence"""
+        m = 0
+        n = 0
+        while i < len(sequence1.itemsets):
+            while (j < len(sequence1.itemsets[i])) & (n < len(sequence2.itemsets[m])):
+                if sequence1.itemsets[i][j] != sequence2.itemsets[m][n]:
+                    return False
+                j += 1
+                n += 1
+            if (j != len(sequence1.itemsets[i])) | \
+                    ((n != len(sequence2.itemsets[m])) & (i != len(sequence1.itemsets) - 1)):
+                return False
+            j = 0
+            n = 0
+            i += 1
+            m += 1
+        return True
 
     def prune_candidates(self):
         pass
