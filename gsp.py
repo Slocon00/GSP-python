@@ -144,7 +144,32 @@ class GSP:
         return True
 
     def prune_candidates(self):
+        """Prune all candidate k-sequences who contain at least one infrequent
+        k-1-subsequence"""
         pass
+
+    def support_count(self):
+        """Calculate support count for all k-candidates, add all frequent ones
+        to frequent_sequences"""
+        pass
+
+    def is_contained(self, c, s):
+        """Check if candidate c is contained in sequence s"""
+        i = 0
+        j = 0
+        while (i < len(c)) & (j < len(s)):
+            k = 0
+            h = 0
+            while (k < len(c[i])) & (h < len(s[j])):
+                if c[i][k] == s[j][h]:
+                    k += 1
+                h += 1
+            if k == len(c[i]):
+                i += 1
+            j += 1
+        if i == len(c):
+            return True
+        return False
 
     def load_db(self, input_filename):
         """Store in db the sequence database contained in input_filename"""
