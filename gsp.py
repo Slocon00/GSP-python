@@ -4,40 +4,36 @@ from copy import deepcopy
 
 class GSP:
 
-    def __init__(self):
-        self.db = []
+    def __init__(self, db, output_filename, minsup):
+        self.db = db
+        self.minsup = minsup
         self.frequent_sequences = {}
         self.candidate_sequences = []
+        self.output_path = Path(output_filename)
 
-    def run_gsp(self, input_filename, output_filename, minsup):
-        """Run GSP algorithm with the given minsup parameter"""
-        if not self.load_db(input_filename):
-            return
+        for i in range(len(self.db)):
+            for element in self.db[i]:
+                for event in element:
+                    if event not in self.frequent_sequences:
+                        self.frequent_sequences[event] = [Sequence()]
+                        self.frequent_sequences[event][0].elements.append([event])
+                    self.frequent_sequences[event][0].set_of_indexes.add(i)
 
-        output_path = Path(output_filename)
-        if output_path.exists():
-            print("File", output_filename, "already exists, want to proceed? [Y/N]")
-            answer = ""
-            while (answer != "Y") & (answer != "N"):
-                answer = input()
-
-            if answer == "N":
-                return
-
+    def run_gsp(self):
         """Find all frequent 1-sequences"""
         for event in self.frequent_sequences:
             support_count = len(self.frequent_sequences[event][0].set_of_indexes)
             support = support_count / len(self.db)
-            if support < minsup:
+            if support < self.minsup:
                 self.frequent_sequences[event].clear()
 
         k = 2
         """Loop until there are no more frequent k-sequences"""
         # while self.frequent_sequences:
-        self.print_frequent_sequences(output_path)
+        self.print_frequent_sequences()
 
-        self.candidate_sequences.clear()
         self.generate_candidates(k)
+        self.candidate_sequences.clear()
 
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
@@ -122,6 +118,7 @@ class GSP:
                         new_candidate.set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                         self.candidate_sequences.append(new_candidate)
+                        print(new_candidate.elements)
 
     def check_if_mergeable(self, sequence1, sequence2, i, j):
         """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
@@ -171,51 +168,48 @@ class GSP:
             return True
         return False
 
-    def load_db(self, input_filename):
-        """Store in db the sequence database contained in input_filename"""
-        path = Path(input_filename)
-        try:
-            content = path.read_text()
-        except FileNotFoundError:
-            print("File", input_filename, "not found.")
-            return False
-
-        chars = content.split()
-        sequence = []
-        element = []
-
-        index = 0
-        for char in chars:
-            if char == "-2":
-                """Character marks end of sequence"""
-                self.db.append(sequence)
-                sequence = []
-                element = []
-                index += 1
-            elif char == "-1":
-                """Character marks end of element"""
-                sequence.append(element)
-                element = []
-            else:
-                """Character is an event"""
-                event = int(char)
-                element.append(event)
-
-                if event not in self.frequent_sequences:
-                    self.frequent_sequences[event] = [Sequence()]
-                    self.frequent_sequences[event][0].elements.append([event])
-                self.frequent_sequences[event][0].set_of_indexes.add(index)
-
-        return True
-
-    def print_frequent_sequences(self, output_path):
+    def print_frequent_sequences(self):
         """Print current frequent sequences to output file"""
         content = ""
         for sequence_list in self.frequent_sequences.values():
             for sequence in sequence_list:
                 content += f"{sequence.elements} : {len(sequence.set_of_indexes)}\n"
 
-        output_path.write_text(content)
+        self.output_path.write_text(content)
+
+
+def load_db(input_filename):
+    """Return the sequence database contained in input_filename"""
+    path = Path(input_filename)
+    try:
+        content = path.read_text()
+    except FileNotFoundError:
+        print("File", input_filename, "not found.")
+        return []
+
+    chars = content.split()
+    database = []
+    sequence = []
+    element = []
+
+    index = 0
+    for char in chars:
+        if char == "-2":
+            """Character marks end of sequence"""
+            database.append(sequence)
+            sequence = []
+            element = []
+            index += 1
+        elif char == "-1":
+            """Character marks end of element"""
+            sequence.append(element)
+            element = []
+        else:
+            """Character is an event"""
+            event = int(char)
+            element.append(event)
+
+    return database
 
 
 class Sequence:
