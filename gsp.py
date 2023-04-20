@@ -13,6 +13,7 @@ class GSP:
         self.frequent_sequences = {}
         self.candidate_sequences = []
         self.output_path = open(output_filename, 'a')
+        self.output_path.truncate(0)
 
         if not verbose:
             logging.disable()
@@ -40,11 +41,19 @@ class GSP:
 
         k = 2
         """Loop until there are no more frequent k-sequences"""
-        # while self.frequent_sequences:
-        self.print_frequent_sequences()
+        while self.frequent_sequences:
+            """All frequent k-1-sequences get printed to the output file"""
+            self.print_frequent_sequences()
 
-        self.generate_candidates(k)
-        self.candidate_sequences.clear()
+            self.generate_candidates(k)
+            """All frequent k-1-sequences are discarded as they're not needed"""
+            for event in self.frequent_sequences:
+                self.frequent_sequences[event].clear()
+
+            self.support_count()
+
+            self.candidate_sequences.clear()
+            k += 1
 
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
@@ -164,7 +173,24 @@ class GSP:
     def support_count(self):
         """Calculate support count for all k-candidates, add all frequent ones
         to frequent_sequences"""
-        pass
+        logging.info("*** Calculating support count ***")
+        for candidate in self.candidate_sequences:
+            for index in list(candidate.set_of_indexes):
+                if not self.is_contained(candidate.elements, self.db[index]):
+                    candidate.set_of_indexes.discard(index)
+
+        logging.info("*** Frequent sequences found: ***")
+        for candidate in self.candidate_sequences:
+            support_count = len(candidate.set_of_indexes)
+            support = support_count / len(self.db)
+            if support >= self.minsup:
+                self.frequent_sequences[candidate.elements[0][0]].append(candidate)
+                logging.info(f"Sequence: {candidate.elements}\n\tSupport count: {support_count}")
+
+        """Keys which correspond to an empty list are removed from frequent_sequences"""
+        for event in list(self.frequent_sequences.keys()):
+            if not self.frequent_sequences[event]:
+                del self.frequent_sequences[event]
 
     def is_contained(self, c, s):
         """Check if candidate c is contained in sequence s"""
