@@ -1,15 +1,21 @@
-from pathlib import Path
+import sys
 from copy import deepcopy
+import logging
+logging.basicConfig(level=logging.INFO, stream=sys.stdout,
+                    format="%(levelname)s:%(message)s")
 
 
 class GSP:
 
-    def __init__(self, db, output_filename, minsup):
+    def __init__(self, db, output_filename, minsup, verbose=False):
         self.db = db
         self.minsup = minsup
         self.frequent_sequences = {}
         self.candidate_sequences = []
-        self.output_path = Path(output_filename)
+        self.output_path = open(output_filename, 'a')
+
+        if not verbose:
+            logging.disable()
 
         for i in range(len(self.db)):
             for element in self.db[i]:
@@ -21,11 +27,16 @@ class GSP:
 
     def run_gsp(self):
         """Find all frequent 1-sequences"""
-        for event in self.frequent_sequences:
+        logging.info("STARTING GSP ALGORITHM\n")
+
+        logging.info("*** Finding all frequent 1-sequences ***")
+        for event in list(self.frequent_sequences.keys()):
             support_count = len(self.frequent_sequences[event][0].set_of_indexes)
             support = support_count / len(self.db)
             if support < self.minsup:
-                self.frequent_sequences[event].clear()
+                del self.frequent_sequences[event]
+            else:
+                logging.info(f"Event: {event} - Support count: {support_count}")
 
         k = 2
         """Loop until there are no more frequent k-sequences"""
@@ -37,6 +48,7 @@ class GSP:
 
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
+        logging.info(f"*** Generating candidate {k}-sequences ***")
         frequent_sequences_list = []
         for value in self.frequent_sequences.values():
             if value:
@@ -57,6 +69,7 @@ class GSP:
                     new_candidate1.set_of_indexes = \
                         sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                     self.candidate_sequences.append(new_candidate1)
+                    logging.info(f"{new_candidate1.elements}")
 
                     """If the two events are different, add two more candidates:
                     [[event2], [event1]] and [[event1, event2]] (or [[event2, event1]])
@@ -71,6 +84,7 @@ class GSP:
                         new_candidate2.set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                         self.candidate_sequences.append(new_candidate2)
+                        logging.info(f"{new_candidate2.elements}")
 
                         """Adds [[event1, event2]] or [[event2, event1]], depending
                         on which is greater than the other
@@ -82,6 +96,8 @@ class GSP:
                         new_candidate3.set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                         self.candidate_sequences.append(new_candidate3)
+                        logging.info(f"{new_candidate3.elements}")
+
         else:
             for sequence1 in frequent_sequences_list:
                 if len(sequence1.elements[0]) > 1:
@@ -118,7 +134,7 @@ class GSP:
                         new_candidate.set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                         self.candidate_sequences.append(new_candidate)
-                        print(new_candidate.elements)
+                        logging.info(f"{new_candidate.elements}")
 
     def check_if_mergeable(self, sequence1, sequence2, i, j):
         """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
@@ -175,14 +191,14 @@ class GSP:
             for sequence in sequence_list:
                 content += f"{sequence.elements} : {len(sequence.set_of_indexes)}\n"
 
-        self.output_path.write_text(content)
+        self.output_path.write(content)
 
 
 def load_db(input_filename):
     """Return the sequence database contained in input_filename"""
-    path = Path(input_filename)
+    path = open(input_filename, 'r')
     try:
-        content = path.read_text()
+        content = path.read()
     except FileNotFoundError:
         print("File", input_filename, "not found.")
         return []
