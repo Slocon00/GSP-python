@@ -126,10 +126,12 @@ class GSP:
                 """Only the sequences that could potentially be merged with the
                 current one get picked
                 """
+                if key not in self.frequent_sequences:
+                    continue
+
                 mergeable_candidates = self.frequent_sequences[key]
 
                 for sequence2 in mergeable_candidates:
-
                     if self.check_if_mergeable(sequence1, sequence2, istart, jstart):
                         new_elements = deepcopy(sequence1.elements)
 
