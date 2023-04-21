@@ -22,8 +22,7 @@ class GSP:
             for element in self.db[i]:
                 for event in element:
                     if event not in self.frequent_sequences:
-                        self.frequent_sequences[event] = [Sequence()]
-                        self.frequent_sequences[event][0].elements.append([event])
+                        self.frequent_sequences[event] = [Sequence([[event]], set())]
                     self.frequent_sequences[event][0].set_of_indexes.add(i)
 
     def run_gsp(self):
@@ -72,39 +71,42 @@ class GSP:
                     event2 = sequence2.elements[0][0]
 
                     """Adds candidate [[event1], [event2]]"""
-                    new_candidate1 = Sequence()
-                    new_candidate1.elements.append([event1])
-                    new_candidate1.elements.append([event2])
-                    new_candidate1.set_of_indexes = \
+                    new_elements1 = [[event1], [event2]]
+                    new_set_of_indexes1 =\
                         sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+
+                    new_candidate1 = Sequence(new_elements1, new_set_of_indexes1)
                     self.candidate_sequences.append(new_candidate1)
+
                     logging.info(f"{new_candidate1.elements}")
 
                     """If the two events are different, add two more candidates:
                     [[event2], [event1]] and [[event1, event2]] (or [[event2, event1]])
                     """
                     if event1 != event2:
-                        new_candidate2 = Sequence()
-                        new_candidate3 = Sequence()
-
                         """Adds candidate [[event2], [event1]]"""
-                        new_candidate2.elements.append([event2])
-                        new_candidate2.elements.append([event1])
-                        new_candidate2.set_of_indexes = \
+                        new_elements2 = [[event2], [event1]]
+                        new_set_of_indexes2 = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+
+                        new_candidate2 = Sequence(new_elements2, new_set_of_indexes2)
                         self.candidate_sequences.append(new_candidate2)
+
                         logging.info(f"{new_candidate2.elements}")
 
                         """Adds [[event1, event2]] or [[event2, event1]], depending
                         on which is greater than the other
                         """
                         if event1 < event2:
-                            new_candidate3.elements.append([event1, event2])
+                            new_elements3 = [[event1, event2]]
                         else:
-                            new_candidate3.elements.append([event2, event1])
-                        new_candidate3.set_of_indexes = \
+                            new_elements3 = [[event2, event1]]
+                        new_set_of_indexes3 = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+
+                        new_candidate3 = Sequence(new_elements3, new_set_of_indexes3)
                         self.candidate_sequences.append(new_candidate3)
+
                         logging.info(f"{new_candidate3.elements}")
 
         else:
@@ -129,20 +131,22 @@ class GSP:
                 for sequence2 in mergeable_candidates:
 
                     if self.check_if_mergeable(sequence1, sequence2, istart, jstart):
-                        new_candidate = Sequence()
-                        new_candidate.elements = deepcopy(sequence1.elements)
+                        new_elements = deepcopy(sequence1.elements)
 
                         len_of_snd = len(sequence2.elements)
 
                         if len(sequence2.elements[len_of_snd - 1]) == 1:
-                            new_candidate.elements.append(deepcopy(sequence2.elements[len_of_snd - 1]))
+                            new_elements.append(deepcopy(sequence2.elements[len_of_snd - 1]))
                         else:
-                            new_candidate.elements[len(new_candidate.elements) - 1].append(
+                            new_elements[len(new_elements) - 1].append(
                                 sequence2.elements[len_of_snd - 1][len(sequence2.elements[len_of_snd - 1]) - 1])
 
-                        new_candidate.set_of_indexes = \
+                        new_set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+
+                        new_candidate = Sequence(new_elements, new_set_of_indexes)
                         self.candidate_sequences.append(new_candidate)
+
                         logging.info(f"{new_candidate.elements}")
 
     def check_if_mergeable(self, sequence1, sequence2, i, j):
@@ -256,6 +260,6 @@ def load_db(input_filename):
 
 class Sequence:
 
-    def __init__(self):
-        self.elements = []
-        self.set_of_indexes = set()
+    def __init__(self, elements, set_of_indexes):
+        self.elements = elements
+        self.set_of_indexes = set_of_indexes
