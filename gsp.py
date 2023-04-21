@@ -30,6 +30,7 @@ class GSP:
         logging.info("STARTING GSP ALGORITHM\n")
 
         logging.info("*** Finding all frequent 1-sequences ***")
+
         for event in list(self.frequent_sequences.keys()):
             support_count = len(self.frequent_sequences[event][0].set_of_indexes)
             support = support_count / len(self.db)
@@ -57,6 +58,7 @@ class GSP:
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
         logging.info(f"*** Generating candidate {k}-sequences ***")
+
         frequent_sequences_list = []
         for value in self.frequent_sequences.values():
             if value:
@@ -112,15 +114,15 @@ class GSP:
         else:
             for sequence1 in frequent_sequences_list:
                 if len(sequence1.elements[0]) > 1:
-                    istart = 0
-                    jstart = 1
+                    starting_elem = 0
+                    starting_event = 1
                     key = sequence1.elements[0][1]
                 else:
                     """If the first element has only one event, pick the first
                     event from the second element
                     """
-                    istart = 1
-                    jstart = 0
+                    starting_elem = 1
+                    starting_event = 0
                     key = sequence1.elements[1][0]
 
                 """Only the sequences that could potentially be merged with the
@@ -132,16 +134,16 @@ class GSP:
                 mergeable_candidates = self.frequent_sequences[key]
 
                 for sequence2 in mergeable_candidates:
-                    if self.check_if_mergeable(sequence1, sequence2, istart, jstart):
+                    if self.check_if_mergeable(sequence1, sequence2, starting_elem, starting_event):
                         new_elements = deepcopy(sequence1.elements)
 
-                        len_of_snd = len(sequence2.elements)
+                        last = len(sequence2.elements) - 1
 
-                        if len(sequence2.elements[len_of_snd - 1]) == 1:
-                            new_elements.append(deepcopy(sequence2.elements[len_of_snd - 1]))
+                        if len(sequence2.elements[last]) == 1:
+                            new_elements.append(deepcopy(sequence2.elements[last]))
                         else:
                             new_elements[len(new_elements) - 1].append(
-                                sequence2.elements[len_of_snd - 1][len(sequence2.elements[len_of_snd - 1]) - 1])
+                                sequence2.elements[last][len(sequence2.elements[last]) - 1])
 
                         new_set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
@@ -151,24 +153,33 @@ class GSP:
 
                         logging.info(f"{new_candidate.elements}")
 
-    def check_if_mergeable(self, sequence1, sequence2, i, j):
+    def check_if_mergeable(self, sequence1, sequence2, curr_elem1, curr_event1):
         """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
         candidate k-sequence"""
-        m = 0
-        n = 0
-        while i < len(sequence1.elements):
-            while (j < len(sequence1.elements[i])) & (n < len(sequence2.elements[m])):
-                if sequence1.elements[i][j] != sequence2.elements[m][n]:
+        curr_elem2 = 0
+        curr_event2 = 0
+        while curr_elem1 < len(sequence1.elements):
+            while (curr_event1 < len(sequence1.elements[curr_elem1])) &\
+                    (curr_event2 < len(sequence2.elements[curr_elem2])):
+                if sequence1.elements[curr_elem1][curr_event1] != \
+                        sequence2.elements[curr_elem2][curr_event2]:
                     return False
-                j += 1
-                n += 1
-            if (j != len(sequence1.elements[i])) | \
-                    ((n != len(sequence2.elements[m])) & (i != len(sequence1.elements) - 1)):
+
+                curr_event1 += 1
+                curr_event2 += 1
+
+            if (curr_event1 != len(sequence1.elements[curr_elem1])) | \
+                    ((curr_event2 != len(sequence2.elements[curr_elem2])) &
+                     (curr_elem1 != len(sequence1.elements) - 1)):
+                """Either one of the current elements has more events than the
+                other (the only exception allowed is if the current element is
+                the last one)"""
                 return False
-            j = 0
-            n = 0
-            i += 1
-            m += 1
+            curr_event1 = 0
+            curr_event2 = 0
+
+            curr_elem1 += 1
+            curr_elem2 += 1
         return True
 
     def prune_candidates(self):
@@ -180,17 +191,20 @@ class GSP:
         """Calculate support count for all k-candidates, add all frequent ones
         to frequent_sequences"""
         logging.info("*** Calculating support count ***")
+
         for candidate in self.candidate_sequences:
             for index in list(candidate.set_of_indexes):
                 if not self.is_contained(candidate.elements, self.db[index]):
                     candidate.set_of_indexes.discard(index)
 
         logging.info("*** Frequent sequences found: ***")
+
         for candidate in self.candidate_sequences:
             support_count = len(candidate.set_of_indexes)
             support = support_count / len(self.db)
             if support >= self.minsup:
                 self.frequent_sequences[candidate.elements[0][0]].append(candidate)
+
                 logging.info(f"Sequence: {candidate.elements}\n\tSupport count: {support_count}")
 
         """Keys which correspond to an empty list are removed from frequent_sequences"""
