@@ -46,6 +46,8 @@ class GSP:
             self.print_frequent_sequences()
 
             self.generate_candidates(k)
+            self.prune_candidates()
+
             """All frequent k-1-sequences are discarded as they're not needed"""
             for event in self.frequent_sequences:
                 self.frequent_sequences[event].clear()
@@ -173,7 +175,8 @@ class GSP:
                      (curr_elem1 != len(sequence1.elements) - 1)):
                 """Either one of the current elements has more events than the
                 other (the only exception allowed is if the current element is
-                the last one)"""
+                the last one)
+                """
                 return False
             curr_event1 = 0
             curr_event2 = 0
@@ -185,7 +188,69 @@ class GSP:
     def prune_candidates(self):
         """Prune all candidate k-sequences who contain at least one infrequent
         k-1-subsequence"""
-        pass
+        logging.info("*** Pruning candidates ***")
+
+        for candidate in list(self.candidate_sequences):
+            logging.info(f"Candidate: {candidate.elements}")
+
+            """Skip check of subsequence obtained by removing first event from
+            fist element
+            """
+            if len(candidate.elements[0]) > 1:
+                starting_elem = 0
+                starting_event = 1
+            else:
+                starting_elem = 1
+                starting_event = 0
+
+            key = candidate.elements[0][0]
+
+            """If no frequent sequences starting with the candidate's 2nd event
+            are found, skip subsequence generation
+            """
+            if key not in self.frequent_sequences:
+                logging.info("No frequent subsequences found")
+                self.candidate_sequences.remove(candidate)
+                continue
+
+            frequent_sequences_list = []
+            for sequence in self.frequent_sequences[key]:
+                frequent_sequences_list.append(sequence.elements)
+
+            infrequent = False
+            curr_event = starting_event
+            for curr_elem in range(starting_elem, len(candidate.elements)):
+                while curr_event < len(candidate.elements[curr_elem]):
+                    subsequence = deepcopy(candidate.elements)
+
+                    if len(subsequence[curr_elem]) == 1:
+                        subsequence.pop(curr_elem)
+                    else:
+                        subsequence[curr_elem].pop(curr_event)
+
+                    logging.info(f"\tSubsequence: {subsequence}")
+
+                    if subsequence not in frequent_sequences_list:
+                        logging.info("\tInfrequent")
+                        infrequent = True
+                        break
+                    else:
+                        logging.info("\tFrequent")
+
+                    if (curr_elem == len(candidate.elements) - 1) & \
+                            (curr_event == len(candidate.elements[curr_elem]) - 1):
+                        """Skip check for subsequence obtained by removing last
+                        event from last element
+                        """
+                        break
+                    curr_event += 1
+
+                if infrequent:
+                    break
+                curr_event = 0
+
+            if infrequent:
+                self.candidate_sequences.remove(candidate)
 
     def support_count(self):
         """Calculate support count for all k-candidates, add all frequent ones
