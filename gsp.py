@@ -306,12 +306,13 @@ class GSP:
 
 def load_db(input_filename):
     """Return the sequence database contained in input_filename"""
-    path = open(input_filename, 'r')
     try:
-        content = path.read()
+        path = open(input_filename, 'r')
     except FileNotFoundError:
         print("File", input_filename, "not found.")
         return []
+
+    content = path.read()
 
     chars = content.split()
     database = []
