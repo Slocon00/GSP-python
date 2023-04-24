@@ -12,6 +12,7 @@ def main(argv):
     """Loading database from input file"""
     database = gsp.load_db(argv.infile)
     if not database:
+        print("Could not load database from input file")
         sys.exit(1)
 
     """Checking output file"""
@@ -22,18 +23,25 @@ def main(argv):
             answer = input()
 
             if answer == "N":
+                print("Quitting")
                 sys.exit(1)
     output_path = open(argv.outfile, 'w')
 
     """Checking min support"""
-    # todo minsup check
+    try:
+        minsup = float(argv.minsup)
+        if (minsup < 0) | (minsup > 1):
+            raise ValueError
+    except ValueError:
+        print("minsup must be expressed as a decimal between 0 and 1")
+        sys.exit(1)
 
     """Running algorithm"""
     algo_obj = GSP(database, float(argv.minsup), argv.verbose)
     result = algo_obj.run_gsp()
 
-    # todo print to outfile
-    print(result)
+    for sequence_info in result:
+        output_path.write(f"{sequence_info[0]} sup: {sequence_info[1]}\n")
 
 
 if __name__ == "__main__":
