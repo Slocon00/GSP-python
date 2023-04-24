@@ -7,13 +7,12 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout,
 
 class GSP:
 
-    def __init__(self, db, output_filename, minsup, verbose=False):
+    def __init__(self, db, minsup, verbose=False):
         self.db = db
         self.minsup = minsup
         self.frequent_sequences = {}
         self.candidate_sequences = []
-        self.output_path = open(output_filename, 'a')
-        self.output_path.truncate(0)
+        self.output = []
 
         if not verbose:
             logging.disable()
@@ -26,11 +25,12 @@ class GSP:
                     self.frequent_sequences[event][0].set_of_indexes.add(i)
 
     def run_gsp(self):
-        """Find all frequent 1-sequences"""
+        """Run GSP algorithm"""
         logging.info("STARTING GSP ALGORITHM\n")
 
         logging.info("*** Finding all frequent 1-sequences ***")
 
+        """Find all frequent 1-sequences"""
         for event in list(self.frequent_sequences.keys()):
             support_count = len(self.frequent_sequences[event][0].set_of_indexes)
             support = support_count / len(self.db)
@@ -56,6 +56,8 @@ class GSP:
 
             self.candidate_sequences.clear()
             k += 1
+
+        return self.output
 
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
@@ -296,13 +298,10 @@ class GSP:
         return False
 
     def print_frequent_sequences(self):
-        """Print current frequent sequences to output file"""
-        content = ""
+        """Add current frequent sequences to output list"""
         for sequence_list in self.frequent_sequences.values():
             for sequence in sequence_list:
-                content += f"{sequence.elements} : {len(sequence.set_of_indexes)}\n"
-
-        self.output_path.write(content)
+                self.output.append((sequence.elements, len(sequence.set_of_indexes)))
 
 
 def load_db(input_filename):
