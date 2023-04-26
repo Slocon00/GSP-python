@@ -7,6 +7,7 @@ from database_gen import DatabaseGenerator
 
 
 def setup_subparsers(parser):
+    """Add subparsers for each algorithm"""
     subparsers = parser.add_subparsers()
     subparsers.required = True
     subparsers.dest = 'subcommand'
@@ -63,10 +64,11 @@ def main(argv):
             print("minsup must be a decimal between 0 and 1")
             sys.exit(1)
 
-        """Running algorithm"""
+        """Running GSP algorithm"""
         algo_obj = GSP(database, parsed_argv.minsup, parsed_argv.verbose)
         result = algo_obj.run_gsp()
 
+        """Printing to output file"""
         for sequence_info in result:
             for element in sequence_info[0]:
                 for event in element:
@@ -87,11 +89,13 @@ def main(argv):
                     sys.exit()
         output_path = open(parsed_argv.outfile, 'w')
 
+        """Generating database"""
         algo_obj = DatabaseGenerator(parsed_argv.size, parsed_argv.nevents,
                                      parsed_argv.maxevents, parsed_argv.maxelems,
                                      parsed_argv.seed, parsed_argv.verbose)
         result = algo_obj.generate_sequence_database()
 
+        """Printing to output file"""
         for sequence in result:
             for element in sequence:
                 for event in element:

@@ -8,11 +8,14 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout,
 class GSP:
     """A class that implements the Generalized Sequential Pattern algorithm.
 
-    An instance of the GSP class is initialized with a reference to the database
-    from which it will mine frequent sequences and min support threshold.
-    The algorithm can then be run with those parameters by calling the run_gsp method.
+    An instance of the GSP class runs the GSP algorithm on a sequence database,
+    mining all frequent sequences in the database whose support is higher or
+    equal than a minimum threshold.
     """
     def __init__(self, db, minsup, verbose=False):
+        """Initialize an instance of the class with a reference to the database
+        from which frequent sequences must be mined and a minsupport threshold
+        """
         self.db = db
         self.minsup = minsup
         self.frequent_sequences = {}
@@ -22,6 +25,7 @@ class GSP:
         if not verbose:
             logging.disable()
 
+        """Find all unique events (1-sequences)"""
         for i in range(len(self.db)):
             for element in self.db[i]:
                 for event in element:

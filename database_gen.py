@@ -8,21 +8,18 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout,
 class DatabaseGenerator:
     """A class that represents a sequence database generator.
 
-    An instance of the DatabaseGenerator class is initialized with the
-    requirements the desired sequence database must meet, and the
-    generate_sequence_database method randomly generates and returns a
-    sequence database as a list[list[list[int]]].
+    An instance of the DatabaseGenerator class can generate a sequence database
+    with a specific set of parameters.
     """
 
     def __init__(self, size, nevents, maxevents, maxelems, seed=None, verbose=False):
-        """Initialize the instance with the given requirements:
-
+        """Initialize an instance with the given requirements:
             size: overall number of sequences in the database
-            nevents: number of unique events in the database
-            maxevents: max number of events contained in a single element
-            maxelems: max number of elements contained in a single sequence
-            seed: the seed to be used for random number generation (if not
-            provided, random's default choice of seed is used)
+            nevents:    number of unique events in the database
+            maxevents:  max number of events contained in a single element
+            maxelems:   max number of elements contained in a single sequence
+            seed:       the seed to be used for random number generation (if not
+                        provided, random's default choice of seed is used)
         """
         self.output = []
 
