@@ -32,8 +32,10 @@ class DatabaseGenerator:
         """mu and sigma values for normal distribution"""
         self.mu_size = self.maxelems*3/4
         self.mu_elem = self.maxevents*3/4
+        self.mu_event = self.maxevents*3/4
         self.s_size = 1.5
         self.s_elem = 1.5
+        self.s_event = 2
 
         if seed is not None:
             random.seed(seed)
@@ -65,7 +67,10 @@ class DatabaseGenerator:
                     logging.info(f"random elem_length: {elem_length}")
 
                 while len(element) < elem_length:
-                    element.add(random.randint(1, self.nevents))
+                    event = -1
+                    while (event < 0) | (event > self.nevents):
+                        event = math.floor(random.normalvariate(self.mu_event, self.s_event) + 0.5)
+                    element.add(event)
 
                 logging.info(f"Element: {element}")
                 sequence.append(list(element))
