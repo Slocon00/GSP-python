@@ -1,8 +1,6 @@
 import sys
 from copy import deepcopy
 import logging
-logging.basicConfig(level=logging.INFO, stream=sys.stdout,
-                    format="%(levelname)s:%(message)s")
 
 
 class GSP:
@@ -22,8 +20,22 @@ class GSP:
         self.candidate_sequences = []
         self.output = []
 
+        """Logging handler gets forcibly reset each time"""
+        logging.basicConfig(level=logging.INFO, stream=sys.stdout,
+                            format="%(levelname)s: %(message)s", force=True)
+
+        """Logger for statistics"""
+        self.stat_logger = logging.getLogger('stat_logger')
+        self.stat_logger.setLevel(100)
+        self.stat_logger.propagate = False
+        formatter = logging.Formatter("%(message)s")
+        handler = logging.FileHandler(filename='statistics.log', mode='w',
+                                      encoding='utf-8')
+        handler.setFormatter(formatter)
+        self.stat_logger.addHandler(handler)
+
         if not verbose:
-            logging.disable()
+            logging.disable(logging.INFO)
 
         """Find all unique events (1-sequences)"""
         for i in range(len(self.db)):
