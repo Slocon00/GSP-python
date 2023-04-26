@@ -68,7 +68,11 @@ def main(argv):
         result = algo_obj.run_gsp()
 
         for sequence_info in result:
-            output_path.write(f"{sequence_info[0]} sup: {sequence_info[1]}\n")
+            for element in sequence_info[0]:
+                for event in element:
+                    output_path.write(f"{event} ")
+                output_path.write("-1 ")
+            output_path.write(f"#SUP: {sequence_info[1]}\n")
 
     elif parsed_argv.subcommand == "DatabaseGen":
         """Checking output file"""
