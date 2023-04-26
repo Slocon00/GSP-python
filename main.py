@@ -29,7 +29,7 @@ def setup_subparsers(parser):
     parser_dbgen.add_argument('nevents', type=int, help='# of unique events')
     parser_dbgen.add_argument('maxevents', type=int, help='max # of events in an element')
     parser_dbgen.add_argument('maxelems', type=int, help='max # of elements in a sequence')
-    parser_dbgen.add_argument('-s', '--seed', help='seed for random event generation')
+    parser_dbgen.add_argument('-s', '--seed', default=None, help='seed for random event generation')
     parser_dbgen.add_argument('-v', '--verbose', action='store_true',
                               help='enable printing of debug messages')
 
