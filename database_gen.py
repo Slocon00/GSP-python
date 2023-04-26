@@ -1,5 +1,6 @@
 import random
 import sys
+import math
 import logging
 logging.basicConfig(level=logging.INFO, stream=sys.stdout,
                     format="%(levelname)s:%(message)s")
@@ -28,6 +29,12 @@ class DatabaseGenerator:
         self.maxevents = maxevents
         self.maxelems = maxelems
 
+        """mu and sigma values for normal distribution"""
+        self.mu_size = self.maxelems*3/4
+        self.mu_elem = self.maxevents*3/4
+        self.s_size = 1.5
+        self.s_elem = 1.5
+
         if seed is not None:
             random.seed(seed)
 
@@ -38,12 +45,26 @@ class DatabaseGenerator:
         """Generate a simple sequence database"""
         for i in range(self.size):
             sequence = []
-            for j in range(1, random.randint(1, self.maxelems) + 1):
+
+            """Generate a random length for the sequence"""
+            seq_length = 0
+            while (seq_length < 1) | (seq_length > self.maxelems):
+                seq_length = math.floor(random.normalvariate(self.mu_size, self.s_size) + 0.5)
+                logging.info(f"random seq_length: {seq_length}")
+
+            for j in range(seq_length):
                 """Element must not contain duplicate events, events are sorted
                 in ascending order
                 """
                 element = set()
-                for k in range(1, random.randint(1, self.maxevents) + 1):
+
+                """Generate a random length for the element"""
+                elem_length = 0
+                while (elem_length < 1) | (elem_length > self.maxevents):
+                    elem_length = math.floor(random.normalvariate(self.mu_elem, self.s_elem) + 0.5)
+                    logging.info(f"random elem_length: {elem_length}")
+
+                while len(element) < elem_length:
                     element.add(random.randint(1, self.nevents))
 
                 logging.info(f"Element: {element}")
