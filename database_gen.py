@@ -1,9 +1,7 @@
 import random
-import sys
 import math
 import logging
-logging.basicConfig(level=logging.INFO, stream=sys.stdout,
-                    format="%(levelname)s:%(message)s")
+logger = logging.getLogger(__name__)
 
 
 class DatabaseGenerator:
@@ -41,7 +39,7 @@ class DatabaseGenerator:
             random.seed(seed)
 
         if not verbose:
-            logging.disable()
+            logger.disabled = True
 
     def generate_sequence_database(self):
         """Generate a simple sequence database"""
@@ -52,7 +50,7 @@ class DatabaseGenerator:
             seq_length = 0
             while (seq_length < 1) | (seq_length > self.maxelems):
                 seq_length = math.floor(random.normalvariate(self.mu_size, self.s_size) + 0.5)
-                logging.info(f"random seq_length: {seq_length}")
+                logger.info(f"random seq_length: {seq_length}")
 
             for j in range(seq_length):
                 """Element must not contain duplicate events, events are sorted
@@ -64,7 +62,7 @@ class DatabaseGenerator:
                 elem_length = 0
                 while (elem_length < 1) | (elem_length > self.maxevents):
                     elem_length = math.floor(random.normalvariate(self.mu_elem, self.s_elem) + 0.5)
-                    logging.info(f"random elem_length: {elem_length}")
+                    logger.info(f"random elem_length: {elem_length}")
 
                 while len(element) < elem_length:
                     event = -1
@@ -72,10 +70,10 @@ class DatabaseGenerator:
                         event = math.floor(random.normalvariate(self.mu_event, self.s_event) + 0.5)
                     element.add(event)
 
-                logging.info(f"Element: {element}")
+                logger.info(f"Element: {element}")
                 sequence.append(list(element))
 
-            logging.info(f"Sequence: {sequence}")
+            logger.info(f"Sequence: {sequence}")
             self.output.append(sequence)
 
         return self.output

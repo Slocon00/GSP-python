@@ -1,6 +1,16 @@
 import sys
 from copy import deepcopy
 import logging
+"""Logger for tracking execution on stdout"""
+logger = logging.getLogger(__name__)
+
+"""Logger for statistics"""
+stat_logger = logging.getLogger('statistics')
+stat_logger.propagate = False
+formatter = logging.Formatter("%(message)s")
+handler = logging.FileHandler(filename='statistics.log', mode='w', encoding='utf-8')
+handler.setFormatter(formatter)
+stat_logger.addHandler(handler)
 
 
 class GSP:
@@ -10,7 +20,7 @@ class GSP:
     mining all frequent sequences in the database whose support is higher or
     equal than a minimum threshold.
     """
-    def __init__(self, db, minsup, verbose=False):
+    def __init__(self, db, minsup, verbose=False, stats=False):
         """Initialize an instance of the class with a reference to the database
         from which frequent sequences must be mined and a minsupport threshold
         """
@@ -20,22 +30,11 @@ class GSP:
         self.candidate_sequences = []
         self.output = []
 
-        """Logging handler gets forcibly reset each time"""
-        logging.basicConfig(level=logging.INFO, stream=sys.stdout,
-                            format="%(levelname)s: %(message)s", force=True)
-
-        """Logger for statistics"""
-        self.stat_logger = logging.getLogger('stat_logger')
-        self.stat_logger.setLevel(100)
-        self.stat_logger.propagate = False
-        formatter = logging.Formatter("%(message)s")
-        handler = logging.FileHandler(filename='statistics.log', mode='w',
-                                      encoding='utf-8')
-        handler.setFormatter(formatter)
-        self.stat_logger.addHandler(handler)
+        if not stats:
+            stat_logger.disabled = True
 
         if not verbose:
-            logging.disable(logging.INFO)
+            logger.disabled = True
 
         """Find all unique events (1-sequences)"""
         for i in range(len(self.db)):
@@ -47,8 +46,8 @@ class GSP:
 
     def run_gsp(self):
         """Run GSP algorithm"""
-        logging.info("STARTING GSP ALGORITHM\n")
-        logging.info("*** Finding all frequent 1-sequences ***")
+        logger.info("STARTING GSP ALGORITHM\n")
+        logger.info("*** Finding all frequent 1-sequences ***")
 
         """Find all frequent 1-sequences"""
         for event in list(self.frequent_sequences.keys()):
@@ -57,7 +56,7 @@ class GSP:
             if support < self.minsup:
                 del self.frequent_sequences[event]
             else:
-                logging.info(f"Event: {event} - Support count: {support_count}")
+                logger.info(f"Event: {event} - Support count: {support_count}")
 
         k = 2
         """Loop until there are no more frequent k-sequences"""
@@ -81,7 +80,7 @@ class GSP:
 
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
-        logging.info(f"*** Generating candidate {k}-sequences ***")
+        logger.info(f"*** Generating candidate {k}-sequences ***")
 
         frequent_sequences_list = []
         for value in self.frequent_sequences.values():
@@ -104,7 +103,7 @@ class GSP:
                     new_candidate1 = Sequence(new_elements1, new_set_of_indexes1)
                     self.candidate_sequences.append(new_candidate1)
 
-                    logging.info(f"{new_candidate1.elements}")
+                    logger.info(f"{new_candidate1.elements}")
 
                     """If the two events are different, add two more candidates:
                     [[event2], [event1]] and [[event1, event2]] (or [[event2, event1]])
@@ -118,7 +117,7 @@ class GSP:
                         new_candidate2 = Sequence(new_elements2, new_set_of_indexes2)
                         self.candidate_sequences.append(new_candidate2)
 
-                        logging.info(f"{new_candidate2.elements}")
+                        logger.info(f"{new_candidate2.elements}")
 
                         """Adds [[event1, event2]] or [[event2, event1]], depending
                         on which is greater than the other
@@ -133,7 +132,7 @@ class GSP:
                         new_candidate3 = Sequence(new_elements3, new_set_of_indexes3)
                         self.candidate_sequences.append(new_candidate3)
 
-                        logging.info(f"{new_candidate3.elements}")
+                        logger.info(f"{new_candidate3.elements}")
 
         else:
             for sequence1 in frequent_sequences_list:
@@ -175,7 +174,7 @@ class GSP:
                         new_candidate = Sequence(new_elements, new_set_of_indexes)
                         self.candidate_sequences.append(new_candidate)
 
-                        logging.info(f"{new_candidate.elements}")
+                        logger.info(f"{new_candidate.elements}")
 
     def check_if_mergeable(self, sequence1, sequence2, curr_elem1, curr_event1):
         """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
@@ -210,10 +209,10 @@ class GSP:
     def prune_candidates(self):
         """Prune all candidate k-sequences who contain at least one infrequent
         k-1-subsequence"""
-        logging.info("*** Pruning candidates ***")
+        logger.info("*** Pruning candidates ***")
 
         for candidate in list(self.candidate_sequences):
-            logging.info(f"Candidate: {candidate.elements}")
+            logger.info(f"Candidate: {candidate.elements}")
 
             """Skip check of subsequence obtained by removing first event from
             fist element
@@ -231,7 +230,7 @@ class GSP:
             are found, skip subsequence generation
             """
             if key not in self.frequent_sequences:
-                logging.info("No frequent subsequences found")
+                logger.info("No frequent subsequences found")
                 self.candidate_sequences.remove(candidate)
                 continue
 
@@ -250,14 +249,14 @@ class GSP:
                     else:
                         subsequence[curr_elem].pop(curr_event)
 
-                    logging.info(f"\tSubsequence: {subsequence}")
+                    logger.info(f"\tSubsequence: {subsequence}")
 
                     if subsequence not in frequent_sequences_list:
-                        logging.info("\tInfrequent")
+                        logger.info("\tInfrequent")
                         infrequent = True
                         break
                     else:
-                        logging.info("\tFrequent")
+                        logger.info("\tFrequent")
 
                     if (curr_elem == len(candidate.elements) - 1) & \
                             (curr_event == len(candidate.elements[curr_elem]) - 1):
@@ -277,14 +276,14 @@ class GSP:
     def support_count(self):
         """Calculate support count for all k-candidates, add all frequent ones
         to frequent_sequences"""
-        logging.info("*** Calculating support count ***")
+        logger.info("*** Calculating support count ***")
 
         for candidate in self.candidate_sequences:
             for index in list(candidate.set_of_indexes):
                 if not self.is_contained(candidate.elements, self.db[index]):
                     candidate.set_of_indexes.discard(index)
 
-        logging.info("*** Frequent sequences found: ***")
+        logger.info("*** Frequent sequences found: ***")
 
         for candidate in self.candidate_sequences:
             support_count = len(candidate.set_of_indexes)
@@ -292,7 +291,8 @@ class GSP:
             if support >= self.minsup:
                 self.frequent_sequences[candidate.elements[0][0]].append(candidate)
 
-                logging.info(f"Sequence: {candidate.elements}\n\tSupport count: {support_count}")
+                logger.info(f"Sequence: {candidate.elements}")
+                logger.info(f"Support count: {support_count}")
 
         """Keys which correspond to an empty list are removed from frequent_sequences"""
         for event in list(self.frequent_sequences.keys()):
