@@ -4,14 +4,6 @@ import logging
 """Logger for tracking execution on stdout"""
 logger = logging.getLogger(__name__)
 
-"""Logger for statistics"""
-stat_logger = logging.getLogger('statistics')
-stat_logger.propagate = False
-formatter = logging.Formatter("%(message)s")
-handler = logging.FileHandler(filename='statistics.log', mode='w', encoding='utf-8')
-handler.setFormatter(formatter)
-stat_logger.addHandler(handler)
-
 
 class GSP:
     """A class that implements the Generalized Sequential Pattern algorithm.
@@ -20,7 +12,7 @@ class GSP:
     mining all frequent sequences in the database whose support is higher or
     equal than a minimum threshold.
     """
-    def __init__(self, db, minsup, verbose=False, stats=False):
+    def __init__(self, db, minsup, verbose=False):
         """Initialize an instance of the class with a reference to the database
         from which frequent sequences must be mined and a minsupport threshold
         """
@@ -29,9 +21,6 @@ class GSP:
         self.frequent_sequences = {}
         self.candidate_sequences = []
         self.output = []
-
-        if not stats:
-            stat_logger.disabled = True
 
         if not verbose:
             logger.disabled = True

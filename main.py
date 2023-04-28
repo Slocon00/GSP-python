@@ -23,8 +23,6 @@ def setup_subparsers(parser):
     parser_gsp.add_argument('minsup', type=float, help='minimum support')
     parser_gsp.add_argument('-v', '--verbose', action='store_true',
                             help='enable printing of debug messages')
-    parser_gsp.add_argument('--stats', action='store_true',
-                            help='enable printing of statistics to log file')
 
     """Subparser for sequence database generator"""
     parser_dbgen = \
@@ -70,7 +68,7 @@ def main(argv):
             sys.exit(1)
 
         """Running GSP algorithm"""
-        algo_obj = GSP(database, parsed_argv.minsup, parsed_argv.verbose, parsed_argv.stats)
+        algo_obj = GSP(database, parsed_argv.minsup, parsed_argv.verbose)
         result = algo_obj.run_gsp()
 
         """Printing to output file"""
