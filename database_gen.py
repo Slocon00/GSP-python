@@ -66,7 +66,7 @@ class DatabaseGenerator:
 
                 while len(element) < elem_length:
                     event = -1
-                    while (event < 0) | (event > self.nevents):
+                    while (event < 1) | (event > self.nevents):
                         event = math.floor(random.normalvariate(self.mu_event, self.s_event) + 0.5)
                     element.add(event)
 
