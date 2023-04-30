@@ -1,4 +1,3 @@
-import sys
 from copy import deepcopy
 import logging
 """Logger for tracking execution on stdout"""
@@ -53,6 +52,7 @@ class GSP:
             """All frequent k-1-sequences get printed to the output file"""
             self.print_frequent_sequences()
 
+            """Generate and prune all candidate k-sequences"""
             self.generate_candidates(k)
             self.prune_candidates()
 
@@ -60,8 +60,10 @@ class GSP:
             for event in self.frequent_sequences:
                 self.frequent_sequences[event].clear()
 
+            """Calculate support count and find frequence k-sequences"""
             self.support_count()
 
+            """Clear candidate sequences for next iteration"""
             self.candidate_sequences.clear()
             k += 1
 
@@ -241,6 +243,9 @@ class GSP:
                     logger.info(f"\tSubsequence: {subsequence}")
 
                     if subsequence not in frequent_sequences_list:
+                        """If one of the k-1 subsequences is infrequent, the
+                        candidate is pruned
+                        """
                         logger.info("\tInfrequent")
                         infrequent = True
                         break
@@ -344,12 +349,13 @@ def load_db(input_filename):
             """Character is an event"""
             event = int(char)
             element.append(event)
-
+    path.close()
     return database
 
 
 class Sequence:
-
+    """A class that models a sequence.
+    """
     def __init__(self, elements, set_of_indexes):
         self.elements = elements
         self.set_of_indexes = set_of_indexes
