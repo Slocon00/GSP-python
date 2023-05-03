@@ -327,27 +327,25 @@ def load_db(input_filename):
         return []
 
     content = path.read()
+    strings = content.split()
 
-    chars = content.split()
     database = []
     sequence = []
     element = []
 
-    index = 0
-    for char in chars:
-        if char == "-2":
-            """Character marks end of sequence"""
+    for string in strings:
+        if string == "-2":
+            """String marks end of sequence"""
             database.append(sequence)
             sequence = []
             element = []
-            index += 1
-        elif char == "-1":
-            """Character marks end of element"""
+        elif string == "-1":
+            """String marks end of element"""
             sequence.append(element)
             element = []
         else:
-            """Character is an event"""
-            event = int(char)
+            """String is an event"""
+            event = int(string)
             element.append(event)
     path.close()
     return database
