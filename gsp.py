@@ -148,7 +148,7 @@ class GSP:
                 mergeable_candidates = self.frequent_sequences[key]
 
                 for sequence2 in mergeable_candidates:
-                    if self.check_if_mergeable(sequence1, sequence2, starting_elem, starting_event):
+                    if self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem, starting_event):
                         new_elements = deepcopy(sequence1.elements)
 
                         last = len(sequence2.elements) - 1
@@ -172,19 +172,19 @@ class GSP:
         candidate k-sequence"""
         curr_elem2 = 0
         curr_event2 = 0
-        while curr_elem1 < len(sequence1.elements):
-            while (curr_event1 < len(sequence1.elements[curr_elem1])) &\
-                    (curr_event2 < len(sequence2.elements[curr_elem2])):
-                if sequence1.elements[curr_elem1][curr_event1] != \
-                        sequence2.elements[curr_elem2][curr_event2]:
+        while curr_elem1 < len(sequence1):
+            while (curr_event1 < len(sequence1[curr_elem1])) &\
+                    (curr_event2 < len(sequence2[curr_elem2])):
+                if sequence1[curr_elem1][curr_event1] != \
+                        sequence2[curr_elem2][curr_event2]:
                     return False
 
                 curr_event1 += 1
                 curr_event2 += 1
 
-            if (curr_event1 != len(sequence1.elements[curr_elem1])) | \
-                    ((curr_event2 != len(sequence2.elements[curr_elem2])) &
-                     (curr_elem1 != len(sequence1.elements) - 1)):
+            if (curr_event1 != len(sequence1[curr_elem1])) | \
+                    ((curr_event2 != len(sequence2[curr_elem2])) &
+                     (curr_elem1 != len(sequence1) - 1)):
                 """Either one of the current elements has more events than the
                 other (the only exception allowed is if the current element is
                 the last one)
