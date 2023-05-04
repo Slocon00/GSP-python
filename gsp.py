@@ -150,6 +150,14 @@ class GSP:
                 mergeable_candidates = self.frequent_sequences[key]
 
                 for sequence2 in mergeable_candidates:
+                    """If the merged candidate has too few possible sequences
+                    it could be contained in, it's immediately discarded
+                    """
+                    new_set_of_indexes = \
+                        sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+                    if len(new_set_of_indexes)/len(self.db) < self.minsup:
+                        continue
+
                     if self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem, starting_event):
                         new_elements = deepcopy(sequence1.elements)
 
@@ -160,9 +168,6 @@ class GSP:
                         else:
                             new_elements[len(new_elements) - 1].append(
                                 sequence2.elements[last][len(sequence2.elements[last]) - 1])
-
-                        new_set_of_indexes = \
-                            sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
 
                         new_candidate = Sequence(new_elements, new_set_of_indexes)
                         self.candidate_sequences.append(new_candidate)
@@ -274,14 +279,6 @@ class GSP:
         logger.info("*** Calculating support count ***")
 
         for candidate in list(self.candidate_sequences):
-            """If the candidate has too few possible sequences it could be
-            contained in, it's immediately discarded
-            """
-            support = len(candidate.set_of_indexes) / len(self.db)
-            if support < self.minsup:
-                self.candidate_sequences.remove(candidate)
-                continue
-
             for index in list(candidate.set_of_indexes):
                 if not self.is_contained(candidate.elements, self.db[index]):
                     candidate.set_of_indexes.discard(index)
