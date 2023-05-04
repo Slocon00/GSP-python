@@ -40,7 +40,7 @@ class GSP:
         logger.info("*** Finding all frequent 1-sequences ***")
 
         """Find all frequent 1-sequences"""
-        for event in list(self.frequent_sequences.keys()):
+        for event in list(self.frequent_sequences):
             support_count = len(self.frequent_sequences[event][0].set_of_indexes)
             support = support_count / len(self.db)
             if support < self.minsup:
@@ -278,7 +278,7 @@ class GSP:
         to frequent_sequences"""
         logger.info("*** Calculating support count ***")
 
-        for candidate in list(self.candidate_sequences):
+        for candidate in self.candidate_sequences:
             for index in list(candidate.set_of_indexes):
                 if not self.is_contained(candidate.elements, self.db[index]):
                     candidate.set_of_indexes.discard(index)
@@ -294,7 +294,7 @@ class GSP:
                 logger.info(f"Support count: {support*self.minsup}")
 
         """Keys which correspond to an empty list are removed from frequent_sequences"""
-        for event in list(self.frequent_sequences.keys()):
+        for event in list(self.frequent_sequences):
             if not self.frequent_sequences[event]:
                 del self.frequent_sequences[event]
 
