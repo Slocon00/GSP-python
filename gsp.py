@@ -1,5 +1,6 @@
 from copy import deepcopy
 import logging
+
 """Logger for tracking execution on stdout"""
 logger = logging.getLogger(__name__)
 
@@ -11,6 +12,7 @@ class GSP:
     mining all frequent sequences in the database whose support is higher or
     equal than a minimum threshold.
     """
+
     def __init__(self, db, minsup, verbose=False):
         """Initialize an instance of the class with a reference to the database
         from which frequent sequences must be mined and a minsupport threshold
@@ -88,7 +90,7 @@ class GSP:
 
                     """Adds candidate [[event1], [event2]]"""
                     new_elements1 = [[event1], [event2]]
-                    new_set_of_indexes1 =\
+                    new_set_of_indexes1 = \
                         sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
 
                     new_candidate1 = Sequence(new_elements1, new_set_of_indexes1)
@@ -173,7 +175,7 @@ class GSP:
         curr_elem2 = 0
         curr_event2 = 0
         while curr_elem1 < len(sequence1):
-            while (curr_event1 < len(sequence1[curr_elem1])) &\
+            while (curr_event1 < len(sequence1[curr_elem1])) & \
                     (curr_event2 < len(sequence2[curr_elem2])):
                 if sequence1[curr_elem1][curr_event1] != \
                         sequence2[curr_elem2][curr_event2]:
@@ -271,7 +273,15 @@ class GSP:
         to frequent_sequences"""
         logger.info("*** Calculating support count ***")
 
-        for candidate in self.candidate_sequences:
+        for candidate in list(self.candidate_sequences):
+            """If the candidate has too few possible sequences it could be
+            contained in, it's immediately discarded
+            """
+            support = len(candidate.set_of_indexes) / len(self.db)
+            if support < self.minsup:
+                self.candidate_sequences.remove(candidate)
+                continue
+
             for index in list(candidate.set_of_indexes):
                 if not self.is_contained(candidate.elements, self.db[index]):
                     candidate.set_of_indexes.discard(index)
@@ -279,13 +289,12 @@ class GSP:
         logger.info("*** Frequent sequences found: ***")
 
         for candidate in self.candidate_sequences:
-            support_count = len(candidate.set_of_indexes)
-            support = support_count / len(self.db)
+            support = len(candidate.set_of_indexes) / len(self.db)
             if support >= self.minsup:
                 self.frequent_sequences[candidate.elements[0][0]].append(candidate)
 
                 logger.info(f"Sequence: {candidate.elements}")
-                logger.info(f"Support count: {support_count}")
+                logger.info(f"Support count: {support*self.minsup}")
 
         """Keys which correspond to an empty list are removed from frequent_sequences"""
         for event in list(self.frequent_sequences.keys()):
@@ -353,6 +362,7 @@ def load_db(input_filename):
 class Sequence:
     """A class that models a sequence.
     """
+
     def __init__(self, elements, set_of_indexes):
         self.elements = elements
         self.set_of_indexes = set_of_indexes
