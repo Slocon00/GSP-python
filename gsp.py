@@ -230,9 +230,8 @@ class GSP:
                 frequent_sequences_list.append(sequence.elements)
 
             infrequent = False
-            curr_event = starting_event
             for curr_elem in range(starting_elem, len(candidate.elements)):
-                while curr_event < len(candidate.elements[curr_elem]):
+                for curr_event in range(starting_event, len(candidate.elements[curr_elem])):
                     subsequence = deepcopy(candidate.elements)
 
                     if len(subsequence[curr_elem]) == 1:
@@ -262,7 +261,7 @@ class GSP:
 
                 if infrequent:
                     break
-                curr_event = 0
+                starting_event = 0
 
             if infrequent:
                 self.candidate_sequences.remove(candidate)
