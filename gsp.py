@@ -40,9 +40,10 @@ class GSP:
         logger.info("*** Finding all frequent 1-sequences ***")
 
         """Find all frequent 1-sequences"""
+        n = len(self.db)
         for event in list(self.frequent_sequences):
             support_count = len(self.frequent_sequences[event][0].set_of_indexes)
-            support = support_count / len(self.db)
+            support = support_count / n
             if support < self.minsup:
                 del self.frequent_sequences[event]
             else:
@@ -128,6 +129,7 @@ class GSP:
                         logger.info(f"{new_candidate3.elements}")
 
         else:
+            n = len(self.db)
             for sequence1 in frequent_sequences_list:
                 if len(sequence1.elements[0]) > 1:
                     starting_elem = 0
@@ -148,14 +150,13 @@ class GSP:
                     continue
 
                 mergeable_candidates = self.frequent_sequences[key]
-
                 for sequence2 in mergeable_candidates:
                     """If the merged candidate has too few possible sequences
                     it could be contained in, it's immediately discarded
                     """
                     new_set_of_indexes = \
                         sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
-                    if len(new_set_of_indexes)/len(self.db) < self.minsup:
+                    if len(new_set_of_indexes)/n < self.minsup:
                         continue
 
                     if self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem, starting_event):
@@ -277,21 +278,24 @@ class GSP:
         """Calculate support count for all k-candidates, add all frequent ones
         to frequent_sequences"""
         logger.info("*** Calculating support count ***")
+        logger.info("*** Frequent sequences found: ***")
 
+        n = len(self.db)
         for candidate in self.candidate_sequences:
+            infrequent = False
             for index in list(candidate.set_of_indexes):
                 if not self.is_contained(candidate.elements, self.db[index]):
                     candidate.set_of_indexes.discard(index)
-
-        logger.info("*** Frequent sequences found: ***")
-
-        for candidate in self.candidate_sequences:
-            support = len(candidate.set_of_indexes) / len(self.db)
-            if support >= self.minsup:
+                    if len(candidate.set_of_indexes) / n < self.minsup:
+                        infrequent = True
+                        break
+            if infrequent:
+                continue
+            if len(candidate.set_of_indexes) / n >= self.minsup:
                 self.frequent_sequences[candidate.elements[0][0]].append(candidate)
 
                 logger.info(f"Sequence: {candidate.elements}")
-                logger.info(f"Support count: {support*self.minsup}")
+                logger.info(f"Support count: {len(candidate.set_of_indexes)}")
 
         """Keys which correspond to an empty list are removed from frequent_sequences"""
         for event in list(self.frequent_sequences):
