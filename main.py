@@ -54,7 +54,7 @@ def main(argv):
         if os.path.exists(parsed_argv.outfile):
             print("File", parsed_argv.outfile, "already exists, want to proceed? [Y/N]")
             answer = ""
-            while (answer != "Y") & (answer != "N"):
+            while (answer != "Y") and (answer != "N"):
                 answer = input()
 
                 if answer == "N":
@@ -84,7 +84,7 @@ def main(argv):
         if os.path.exists(parsed_argv.outfile):
             print("File", parsed_argv.outfile, "already exists, want to proceed? [Y/N]")
             answer = ""
-            while (answer != "Y") & (answer != "N"):
+            while (answer != "Y") and (answer != "N"):
                 answer = input()
 
                 if answer == "N":

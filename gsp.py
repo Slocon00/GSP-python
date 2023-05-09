@@ -181,7 +181,7 @@ class GSP:
         curr_elem2 = 0
         curr_event2 = 0
         while curr_elem1 < len(sequence1):
-            while (curr_event1 < len(sequence1[curr_elem1])) & \
+            while (curr_event1 < len(sequence1[curr_elem1])) and \
                     (curr_event2 < len(sequence2[curr_elem2])):
                 if sequence1[curr_elem1][curr_event1] != \
                         sequence2[curr_elem2][curr_event2]:
@@ -190,8 +190,8 @@ class GSP:
                 curr_event1 += 1
                 curr_event2 += 1
 
-            if (curr_event1 != len(sequence1[curr_elem1])) | \
-                    ((curr_event2 != len(sequence2[curr_elem2])) &
+            if (curr_event1 != len(sequence1[curr_elem1])) or \
+                    ((curr_event2 != len(sequence2[curr_elem2])) and
                      (curr_elem1 != len(sequence1) - 1)):
                 """Either one of the current elements has more events than the
                 other (the only exception allowed is if the current element is
@@ -259,7 +259,7 @@ class GSP:
                     else:
                         logger.info("\tFrequent")
 
-                    if (curr_elem == len(candidate.elements) - 1) & \
+                    if (curr_elem == len(candidate.elements) - 1) and \
                             (curr_event == len(candidate.elements[curr_elem]) - 1):
                         """Skip check for subsequence obtained by removing last
                         event from last element
@@ -306,10 +306,10 @@ class GSP:
         """Check if candidate c is contained in sequence s"""
         i = 0
         j = 0
-        while (i < len(c)) & (j < len(s)):
+        while (i < len(c)) and (j < len(s)):
             k = 0
             h = 0
-            while (k < len(c[i])) & (h < len(s[j])):
+            while (k < len(c[i])) and (h < len(s[j])):
                 if c[i][k] == s[j][h]:
                     k += 1
                 h += 1
