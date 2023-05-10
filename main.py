@@ -84,10 +84,10 @@ def main(argv):
         if os.path.exists(parsed_argv.outfile):
             print("File", parsed_argv.outfile, "already exists, want to proceed? [Y/N]")
             answer = ""
-            while (answer != "Y") and (answer != "N"):
+            while answer not in ["Y", "y", "N", "n"]:
                 answer = input()
 
-                if answer == "N":
+                if answer in ["N", "n"]:
                     print("Quitting")
                     sys.exit()
         output_path = open(parsed_argv.outfile, 'w')
