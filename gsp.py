@@ -324,8 +324,7 @@ class GSP:
             logger.info(f"Checking if {c} is in {s}")
 
         i = 0
-        j = 0
-        while (i < len(c)) and (j < len(s)):
+        for j in range(len(s)):
             if self.log:
                 logger.info(f"Checking elements: {c[i]} in {s[i]}")
 
@@ -334,9 +333,8 @@ class GSP:
                     logger.info(f"Yes")
 
                 i += 1
-            j += 1
-        if i == len(c):
-            return True
+                if i == len(c):
+                    return True
         return False
 
     def print_frequent_sequences(self):
