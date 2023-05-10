@@ -304,16 +304,14 @@ class GSP:
 
     def is_contained(self, c, s):
         """Check if candidate c is contained in sequence s"""
+        logger.info(f"Checking if {c} is in {s}")
+
         i = 0
         j = 0
         while (i < len(c)) and (j < len(s)):
-            k = 0
-            h = 0
-            while (k < len(c[i])) and (h < len(s[j])):
-                if c[i][k] == s[j][h]:
-                    k += 1
-                h += 1
-            if k == len(c[i]):
+            logger.info(f"Checking elements: {c[i]} in {s[i]}")
+            if all(event in s[j] for event in c[i]):
+                logger.info(f"Yes")
                 i += 1
             j += 1
         if i == len(c):
