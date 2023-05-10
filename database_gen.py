@@ -30,10 +30,10 @@ class DatabaseGenerator:
         """mu and sigma values for normal distribution"""
         self.mu_size = self.maxelems*3/4
         self.mu_elem = self.maxevents*3/4
-        self.mu_event = self.maxevents*3/4
+        self.mu_event = self.nevents*3/4
         self.s_size = 1.5
-        self.s_elem = 1.5
-        self.s_event = 2
+        self.s_elem = self.maxevents*3/4
+        self.s_event = self.nevents*3/4
 
         if seed is not None:
             random.seed(seed)
