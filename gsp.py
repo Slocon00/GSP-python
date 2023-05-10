@@ -237,16 +237,6 @@ class GSP:
 
             key = candidate.elements[0][0]
 
-            """If no frequent sequences starting with the candidate's 2nd event
-            are found, skip subsequence generation
-            """
-            if key not in self.frequent_sequences:
-                if self.log:
-                    logger.info("No frequent subsequences found")
-
-                self.candidate_sequences.remove(candidate)
-                continue
-
             frequent_sequences_list = []
             for sequence in self.frequent_sequences[key]:
                 frequent_sequences_list.append(sequence.elements)
@@ -274,12 +264,11 @@ class GSP:
                         break
 
                     if (curr_elem == len(candidate.elements) - 1) and \
-                            (curr_event == len(candidate.elements[curr_elem]) - 1):
+                            (curr_event == len(candidate.elements[curr_elem]) - 2):
                         """Skip check for subsequence obtained by removing last
                         event from last element
                         """
                         break
-                    curr_event += 1
 
                 if infrequent:
                     break
