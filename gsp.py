@@ -226,7 +226,7 @@ class GSP:
                 logger.info(f"Candidate: {candidate.elements}")
 
             """Skip check of subsequence obtained by removing first event from
-            fist element
+            first element
             """
             if len(candidate.elements[0]) > 1:
                 starting_elem = 0
@@ -302,7 +302,7 @@ class GSP:
                 logger.info(f"Sequence: {candidate.elements}")
                 logger.info(f"Support count: {len(candidate.set_of_indexes)}")
 
-        """Keys which correspond to an empty list are removed from frequent_sequences"""
+        """Keys that correspond to an empty list are removed from frequent_sequences"""
         for event in list(self.frequent_sequences):
             if not self.frequent_sequences[event]:
                 del self.frequent_sequences[event]
