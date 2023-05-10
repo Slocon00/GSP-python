@@ -62,7 +62,9 @@ class GSP:
 
             """Generate and prune all candidate k-sequences"""
             self.generate_candidates(k)
-            self.prune_candidates()
+
+            if k > 2:
+                self.prune_candidates()
 
             """All frequent k-1-sequences are discarded as they're not needed"""
             for event in self.frequent_sequences:
