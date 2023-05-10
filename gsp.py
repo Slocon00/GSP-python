@@ -306,12 +306,12 @@ class GSP:
                         break
             if infrequent:
                 continue
-            if len(candidate.set_of_indexes) / n >= self.minsup:
-                self.frequent_sequences[candidate.elements[0][0]].append(candidate)
 
-                if self.log:
-                    logger.info(f"Sequence: {candidate.elements}")
-                    logger.info(f"Support count: {len(candidate.set_of_indexes)}")
+            self.frequent_sequences[candidate.elements[0][0]].append(candidate)
+
+            if self.log:
+                logger.info(f"Sequence: {candidate.elements}")
+                logger.info(f"Support count: {len(candidate.set_of_indexes)}")
 
         """Keys which correspond to an empty list are removed from frequent_sequences"""
         for event in list(self.frequent_sequences):
