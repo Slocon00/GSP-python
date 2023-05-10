@@ -1,5 +1,6 @@
 /.idea/
+/databases/
+/statistics/
 *.txt
-*.log
 *.csv
 test.py
