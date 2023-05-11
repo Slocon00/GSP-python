@@ -71,7 +71,9 @@ class DatabaseGenerator:
                     element.add(event)
 
                 logger.info(f"Element: {element}")
-                sequence.append(list(element))
+                sorted_element = list(element)
+                sorted_element.sort()
+                sequence.append(sorted_element)
 
             logger.info(f"Sequence: {sequence}")
             self.output.append(sequence)
