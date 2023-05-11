@@ -175,13 +175,10 @@ class GSP:
                     if k == 3 or self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem):
                         new_elements = deepcopy(sequence1.elements)
 
-                        last = len(sequence2.elements) - 1
-
-                        if len(sequence2.elements[last]) == 1:
-                            new_elements.append(deepcopy(sequence2.elements[last]))
+                        if len(sequence2.elements[-1]) == 1:
+                            new_elements.append(list(sequence2.elements[-1]))
                         else:
-                            new_elements[len(new_elements) - 1].append(
-                                sequence2.elements[last][len(sequence2.elements[last]) - 1])
+                            new_elements[-1].append(sequence2.elements[-1][-1])
 
                         new_candidate = Sequence(new_elements, new_set_of_indexes)
                         self.candidate_sequences.append(new_candidate)
