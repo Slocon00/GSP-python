@@ -102,23 +102,29 @@ class GSP:
                     """Adds candidate [[event1], [event2]]"""
                     new_elements1 = [[event1], [event2]]
 
+                    """If the merged candidate has too few possible sequences
+                    it could be contained in, it's immediately discarded
+                    """
+                    new_set_of_indexes = \
+                        sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+                    if len(new_set_of_indexes) / n < self.minsup:
+                        continue
+
+                    new_candidate1 = Sequence(new_elements1, new_set_of_indexes)
+                    self.candidate_sequences.append(new_candidate1)
+
+                    if self.log:
+                        logger.info(f"{new_candidate1.elements}")
+
                     if event1 != event2:
                         """If the two events are different, add two more candidates:
                         [[event2], [event1]] and [[event1, event2]] (or [[event2, event1]])
                         """
-                        new_set_of_indexes = \
-                            sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
-
-                        """If the merged candidate has too few possible sequences
-                        it could be contained in, it's immediately discarded
-                        """
-                        if len(new_set_of_indexes) / n < self.minsup:
-                            continue
 
                         """Adds candidate [[event2], [event1]]"""
                         new_elements2 = [[event2], [event1]]
 
-                        new_candidate2 = Sequence(new_elements2, new_set_of_indexes)
+                        new_candidate2 = Sequence(new_elements2, set(new_set_of_indexes))
                         self.candidate_sequences.append(new_candidate2)
 
                         """Adds [[event1, event2]] or [[event2, event1]], depending
@@ -129,20 +135,13 @@ class GSP:
                         else:
                             new_elements3 = [[event2, event1]]
 
-                        new_candidate3 = Sequence(new_elements3, new_set_of_indexes)
+                        new_candidate3 = Sequence(new_elements3, set(new_set_of_indexes))
                         self.candidate_sequences.append(new_candidate3)
 
                         if self.log:
                             logger.info(f"{new_candidate2.elements}")
                             logger.info(f"{new_candidate3.elements}")
-                    else:
-                        new_set_of_indexes = sequence1.set_of_indexes
 
-                    new_candidate1 = Sequence(new_elements1, new_set_of_indexes)
-                    self.candidate_sequences.append(new_candidate1)
-
-                    if self.log:
-                        logger.info(f"{new_candidate1.elements}")
         else:
             for sequence1 in frequent_sequences_list:
                 if len(sequence1.elements[0]) > 1:
@@ -320,7 +319,7 @@ class GSP:
         i = 0
         for j in range(len(s)):
             if self.log:
-                logger.info(f"Checking elements: {c[i]} in {s[j]}")
+                logger.info(f"Checking elements: {c[i]} in {s[i]}")
 
             if all(event in s[j] for event in c[i]):
                 if self.log:
