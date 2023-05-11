@@ -172,7 +172,7 @@ class GSP:
                     if len(new_set_of_indexes) / n < self.minsup:
                         continue
 
-                    if k == 3 or self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem, starting_event):
+                    if k == 3 or self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem):
                         new_elements = deepcopy(sequence1.elements)
 
                         last = len(sequence2.elements) - 1
@@ -189,34 +189,28 @@ class GSP:
                         if self.log:
                             logger.info(f"{new_candidate.elements}")
 
-    def check_if_mergeable(self, sequence1, sequence2, curr_elem1, curr_event1):
+    def check_if_mergeable(self, sequence1, sequence2, starting_elem1):
         """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
         candidate k-sequence"""
-        curr_elem2 = 0
-        curr_event2 = 0
-        while curr_elem1 < len(sequence1):
-            while (curr_event1 < len(sequence1[curr_elem1])) and \
-                    (curr_event2 < len(sequence2[curr_elem2])):
-                if sequence1[curr_elem1][curr_event1] != \
-                        sequence2[curr_elem2][curr_event2]:
-                    return False
 
-                curr_event1 += 1
-                curr_event2 += 1
-
-            if (curr_event1 != len(sequence1[curr_elem1])) or \
-                    ((curr_event2 != len(sequence2[curr_elem2])) and
-                     (curr_elem1 != len(sequence1) - 1)):
-                """Either one of the current elements has more events than the
-                other (the only exception allowed is if the current element is
-                the last one)
-                """
+        if starting_elem1 == 0:
+            if sequence1[0][1:] != sequence2[0]:
                 return False
-            curr_event1 = 0
-            curr_event2 = 0
+            start = 1
+        else:
+            start = 0
 
-            curr_elem1 += 1
-            curr_elem2 += 1
+        for i in range(start, len(sequence1) - starting_elem1):
+            if i == (len(sequence2) - 1):
+                break
+
+            if sequence1[i + starting_elem1] != sequence2[i]:
+                return False
+
+        if len(sequence2[-1]) > 1:
+            if sequence1[-1] != sequence2[-1][:-1]:
+                return False
+
         return True
 
     def prune_candidates(self):
