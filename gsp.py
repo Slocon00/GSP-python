@@ -89,6 +89,8 @@ class GSP:
             if value:
                 frequent_sequences_list.extend(value)
 
+        n = len(self.db)
+
         if k == 2:
             for i in range(len(frequent_sequences_list)):
                 for j in range(i, len(frequent_sequences_list)):
@@ -99,29 +101,25 @@ class GSP:
 
                     """Adds candidate [[event1], [event2]]"""
                     new_elements1 = [[event1], [event2]]
-                    new_set_of_indexes1 = \
-                        sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
 
-                    new_candidate1 = Sequence(new_elements1, new_set_of_indexes1)
-                    self.candidate_sequences.append(new_candidate1)
-
-                    if self.log:
-                        logger.info(f"{new_candidate1.elements}")
-
-                    """If the two events are different, add two more candidates:
-                    [[event2], [event1]] and [[event1, event2]] (or [[event2, event1]])
-                    """
                     if event1 != event2:
-                        """Adds candidate [[event2], [event1]]"""
-                        new_elements2 = [[event2], [event1]]
-                        new_set_of_indexes2 = \
+                        """If the two events are different, add two more candidates:
+                        [[event2], [event1]] and [[event1, event2]] (or [[event2, event1]])
+                        """
+                        new_set_of_indexes = \
                             sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
 
-                        new_candidate2 = Sequence(new_elements2, new_set_of_indexes2)
-                        self.candidate_sequences.append(new_candidate2)
+                        """If the merged candidate has too few possible sequences
+                        it could be contained in, it's immediately discarded
+                        """
+                        if len(new_set_of_indexes) / n < self.minsup:
+                            continue
 
-                        if self.log:
-                            logger.info(f"{new_candidate2.elements}")
+                        """Adds candidate [[event2], [event1]]"""
+                        new_elements2 = [[event2], [event1]]
+
+                        new_candidate2 = Sequence(new_elements2, new_set_of_indexes)
+                        self.candidate_sequences.append(new_candidate2)
 
                         """Adds [[event1, event2]] or [[event2, event1]], depending
                         on which is greater than the other
@@ -130,29 +128,34 @@ class GSP:
                             new_elements3 = [[event1, event2]]
                         else:
                             new_elements3 = [[event2, event1]]
-                        new_set_of_indexes3 = \
-                            sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
 
-                        new_candidate3 = Sequence(new_elements3, new_set_of_indexes3)
+                        new_candidate3 = Sequence(new_elements3, new_set_of_indexes)
                         self.candidate_sequences.append(new_candidate3)
 
                         if self.log:
+                            logger.info(f"{new_candidate2.elements}")
                             logger.info(f"{new_candidate3.elements}")
+                    else:
+                        new_set_of_indexes = sequence1.set_of_indexes
 
+                    new_candidate1 = Sequence(new_elements1, new_set_of_indexes)
+                    self.candidate_sequences.append(new_candidate1)
+
+                    if self.log:
+                        logger.info(f"{new_candidate1.elements}")
         else:
-            n = len(self.db)
             for sequence1 in frequent_sequences_list:
                 if len(sequence1.elements[0]) > 1:
                     starting_elem = 0
                     starting_event = 1
-                    key = sequence1.elements[0][1]
                 else:
                     """If the first element has only one event, pick the first
                     event from the second element
                     """
                     starting_elem = 1
                     starting_event = 0
-                    key = sequence1.elements[1][0]
+
+                key = sequence1.elements[starting_elem][starting_event]
 
                 """Only the sequences that could potentially be merged with the
                 current one get picked
@@ -167,10 +170,10 @@ class GSP:
                     """
                     new_set_of_indexes = \
                         sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
-                    if len(new_set_of_indexes)/n < self.minsup:
+                    if len(new_set_of_indexes) / n < self.minsup:
                         continue
 
-                    if self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem, starting_event):
+                    if k == 3 or self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem, starting_event):
                         new_elements = deepcopy(sequence1.elements)
 
                         last = len(sequence2.elements) - 1
@@ -333,6 +336,7 @@ class GSP:
         for sequence_list in self.frequent_sequences.values():
             for sequence in sequence_list:
                 self.output.append((sequence.elements, len(sequence.set_of_indexes)))
+
 
 def load_db(input_filename):
     """Return the sequence database contained in input_filename"""
