@@ -320,7 +320,7 @@ class GSP:
         i = 0
         for j in range(len(s)):
             if self.log:
-                logger.info(f"Checking elements: {c[i]} in {s[i]}")
+                logger.info(f"Checking elements: {c[i]} in {s[j]}")
 
             if all(event in s[j] for event in c[i]):
                 if self.log:
