@@ -28,12 +28,12 @@ class GSP:
             logger.disabled = True
 
         """Find all unique events (1-sequences)"""
-        for i in range(len(self.db)):
-            for element in self.db[i]:
+        for index, sequence in enumerate(self.db):
+            for element in sequence:
                 for event in element:
                     if event not in self.frequent_sequences:
                         self.frequent_sequences[event] = [Sequence([[event]], set())]
-                    self.frequent_sequences[event][0].set_of_indexes.add(i)
+                    self.frequent_sequences[event][0].set_of_indexes.add(index)
 
     def run_gsp(self):
         """Run GSP algorithm"""
@@ -84,21 +84,16 @@ class GSP:
 
         frequent_sequences_list = []
         for value in self.frequent_sequences.values():
-            if value:
-                frequent_sequences_list.extend(value)
+            frequent_sequences_list.extend(value)
 
         n = len(self.db)
 
         if k == 2:
-            for i in range(len(frequent_sequences_list)):
+            for i, sequence1 in enumerate(frequent_sequences_list):
                 for j in range(i, len(frequent_sequences_list)):
-                    sequence1 = frequent_sequences_list[i]
                     sequence2 = frequent_sequences_list[j]
                     event1 = sequence1.elements[0][0]
                     event2 = sequence2.elements[0][0]
-
-                    """Adds candidate [[event1], [event2]]"""
-                    new_elements1 = [[event1], [event2]]
 
                     """If the merged candidate has too few possible sequences
                     it could be contained in, it's immediately discarded
@@ -107,6 +102,9 @@ class GSP:
                         sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
                     if len(new_set_of_indexes) / n < self.minsup:
                         continue
+
+                    """Adds candidate [[event1], [event2]]"""
+                    new_elements1 = [[event1], [event2]]
 
                     new_candidate1 = Sequence(new_elements1, new_set_of_indexes)
                     self.candidate_sequences.append(new_candidate1)
@@ -195,8 +193,9 @@ class GSP:
         else:
             start = 0
 
+        stop = len(sequence2) - 1
         for i in range(start, len(sequence1) - starting_elem1):
-            if i == (len(sequence2) - 1):
+            if i == stop:
                 break
 
             if sequence1[i + starting_elem1] != sequence2[i]:
@@ -235,11 +234,12 @@ class GSP:
                 frequent_sequences_list.append(sequence.elements)
 
             infrequent = False
+            last_elem = len(candidate.elements) - 1
+            last_event = len(candidate.elements[last_elem]) - 1
             for curr_elem in range(starting_elem, len(candidate.elements)):
                 for curr_event in range(starting_event, len(candidate.elements[curr_elem])):
 
-                    if (curr_elem == len(candidate.elements) - 1) and \
-                            (curr_event == len(candidate.elements[curr_elem]) - 1):
+                    if (curr_elem == last_elem) and (curr_event == last_event):
                         """Skip check for subsequence obtained by removing last
                         event from last element, it's always frequent
                         """
@@ -316,11 +316,11 @@ class GSP:
             logger.info(f"Checking if {c} is in {s}")
 
         i = 0
-        for j in range(len(s)):
+        for s_element in s:
             if self.log:
-                logger.info(f"Checking elements: {c[i]} in {s[i]}")
+                logger.info(f"Checking elements: {c[i]} in {s_element}")
 
-            if all(event in s[j] for event in c[i]):
+            if all(event in s_element for event in c[i]):
                 if self.log:
                     logger.info(f"Yes")
 
