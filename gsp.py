@@ -23,11 +23,9 @@ class GSP:
         self.candidate_sequences = []
         self.output = []
 
+        self.log = verbose
         if not verbose:
             logger.disabled = True
-            self.log = False
-        else:
-            self.log = True
 
         """Find all unique events (1-sequences)"""
         for i in range(len(self.db)):
@@ -221,7 +219,7 @@ class GSP:
                 logger.info(f"Candidate: {candidate.elements}")
 
             """Skip check of subsequence obtained by removing first event from
-            first element
+            first element, it's always frequent
             """
             if len(candidate.elements[0]) > 1:
                 starting_elem = 0
@@ -239,17 +237,29 @@ class GSP:
             infrequent = False
             for curr_elem in range(starting_elem, len(candidate.elements)):
                 for curr_event in range(starting_event, len(candidate.elements[curr_elem])):
-                    subsequence = deepcopy(candidate.elements)
 
-                    if len(subsequence[curr_elem]) == 1:
-                        subsequence.pop(curr_elem)
+                    if (curr_elem == len(candidate.elements) - 1) and \
+                            (curr_event == len(candidate.elements[curr_elem]) - 1):
+                        """Skip check for subsequence obtained by removing last
+                        event from last element, it's always frequent
+                        """
+                        break
+
+                    """flag is used to mark whether a single event or a whole
+                    element was removed from the candidate so it can be later
+                    reinserted
+                    """
+                    if len(candidate.elements[curr_elem]) == 1:
+                        popped_item = candidate.elements.pop(curr_elem)
+                        flag = 0
                     else:
-                        subsequence[curr_elem].pop(curr_event)
+                        popped_item = candidate.elements[curr_elem].pop(curr_event)
+                        flag = 1
 
                     if self.log:
-                        logger.info(f"\tSubsequence: {subsequence}")
+                        logger.info(f"\tSubsequence: {candidate.elements}")
 
-                    if subsequence not in frequent_sequences_list:
+                    if candidate.elements not in frequent_sequences_list:
                         """If one of the k-1 subsequences is infrequent, the
                         candidate is pruned
                         """
@@ -258,12 +268,10 @@ class GSP:
                         infrequent = True
                         break
 
-                    if (curr_elem == len(candidate.elements) - 1) and \
-                            (curr_event == len(candidate.elements[curr_elem]) - 2):
-                        """Skip check for subsequence obtained by removing last
-                        event from last element
-                        """
-                        break
+                    if flag:
+                        candidate.elements[curr_elem].insert(curr_event, popped_item)
+                    else:
+                        candidate.elements.insert(curr_elem, popped_item)
 
                 if infrequent:
                     break
