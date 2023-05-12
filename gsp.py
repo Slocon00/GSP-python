@@ -23,7 +23,7 @@ class GSP:
         self.candidate_sequences = []
         self.output = []
 
-        self.log = verbose
+        self.verbose = verbose
         if not verbose:
             logger.disabled = True
 
@@ -37,7 +37,7 @@ class GSP:
 
     def run_gsp(self):
         """Run GSP algorithm"""
-        if self.log:
+        if self.verbose:
             logger.info("STARTING GSP ALGORITHM\n")
             logger.info("*** Finding all frequent 1-sequences ***")
 
@@ -49,7 +49,7 @@ class GSP:
             if support < self.minsup:
                 del self.frequent_sequences[event]
             else:
-                if self.log:
+                if self.verbose:
                     logger.info(f"Event: {event} - Support count: {support_count}")
 
         k = 2
@@ -79,7 +79,7 @@ class GSP:
 
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
-        if self.log:
+        if self.verbose:
             logger.info(f"*** Generating candidate {k}-sequences ***")
 
         frequent_sequences_list = []
@@ -109,7 +109,7 @@ class GSP:
                     new_candidate1 = Sequence(new_elements1, new_set_of_indexes)
                     self.candidate_sequences.append(new_candidate1)
 
-                    if self.log:
+                    if self.verbose:
                         logger.info(f"{new_candidate1.elements}")
 
                     if event1 != event2:
@@ -134,7 +134,7 @@ class GSP:
                         new_candidate3 = Sequence(new_elements3, set(new_set_of_indexes))
                         self.candidate_sequences.append(new_candidate3)
 
-                        if self.log:
+                        if self.verbose:
                             logger.info(f"{new_candidate2.elements}")
                             logger.info(f"{new_candidate3.elements}")
 
@@ -179,7 +179,7 @@ class GSP:
                         new_candidate = Sequence(new_elements, new_set_of_indexes)
                         self.candidate_sequences.append(new_candidate)
 
-                        if self.log:
+                        if self.verbose:
                             logger.info(f"{new_candidate.elements}")
 
     def check_if_mergeable(self, sequence1, sequence2, starting_elem1):
@@ -210,11 +210,11 @@ class GSP:
     def prune_candidates(self):
         """Prune all candidate k-sequences who contain at least one infrequent
         k-1-subsequence"""
-        if self.log:
+        if self.verbose:
             logger.info("*** Pruning candidates ***")
 
         for candidate in list(self.candidate_sequences):
-            if self.log:
+            if self.verbose:
                 logger.info(f"Candidate: {candidate.elements}")
 
             """Skip check of subsequence obtained by removing first event from
@@ -256,14 +256,14 @@ class GSP:
                         popped_item = candidate.elements[curr_elem].pop(curr_event)
                         flag = 1
 
-                    if self.log:
+                    if self.verbose:
                         logger.info(f"\tSubsequence: {candidate.elements}")
 
                     if candidate.elements not in frequent_sequences_list:
                         """If one of the k-1 subsequences is infrequent, the
                         candidate is pruned
                         """
-                        if self.log:
+                        if self.verbose:
                             logger.info("\tInfrequent")
                         infrequent = True
                         break
@@ -283,7 +283,7 @@ class GSP:
     def support_count(self):
         """Calculate support count for all k-candidates, add all frequent ones
         to frequent_sequences"""
-        if self.log:
+        if self.verbose:
             logger.info("*** Calculating support count ***")
             logger.info("*** Frequent sequences found: ***")
 
@@ -301,7 +301,7 @@ class GSP:
 
             self.frequent_sequences[candidate.elements[0][0]].append(candidate)
 
-            if self.log:
+            if self.verbose:
                 logger.info(f"Sequence: {candidate.elements}")
                 logger.info(f"Support count: {len(candidate.set_of_indexes)}")
 
@@ -312,16 +312,16 @@ class GSP:
 
     def is_contained(self, c, s):
         """Check if candidate c is contained in sequence s"""
-        if self.log:
+        if self.verbose:
             logger.info(f"Checking if {c} is in {s}")
 
         i = 0
         for s_element in s:
-            if self.log:
+            if self.verbose:
                 logger.info(f"Checking elements: {c[i]} in {s_element}")
 
             if all(event in s_element for event in c[i]):
-                if self.log:
+                if self.verbose:
                     logger.info(f"Yes")
 
                 i += 1
