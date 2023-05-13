@@ -141,16 +141,14 @@ class GSP:
         else:
             for sequence1 in frequent_sequences_list:
                 if len(sequence1.elements[0]) > 1:
+                    key = sequence1.elements[0][1]
                     starting_elem = 0
-                    starting_event = 1
                 else:
                     """If the first element has only one event, pick the first
                     event from the second element
                     """
+                    key = sequence1.elements[1][0]
                     starting_elem = 1
-                    starting_event = 0
-
-                key = sequence1.elements[starting_elem][starting_event]
 
                 """Only the sequences that could potentially be merged with the
                 current one get picked
@@ -234,12 +232,12 @@ class GSP:
                 frequent_sequences_list.append(sequence.elements)
 
             infrequent = False
-            last_elem = len(candidate.elements) - 1
-            last_event = len(candidate.elements[last_elem]) - 1
-            for curr_elem in range(starting_elem, len(candidate.elements)):
-                for curr_event in range(starting_event, len(candidate.elements[curr_elem])):
+            last_elem = len(candidate.elements)
+            for curr_elem in range(starting_elem, last_elem):
+                last_event = len(candidate.elements[curr_elem])
+                for curr_event in range(starting_event, last_event):
 
-                    if (curr_elem == last_elem) and (curr_event == last_event):
+                    if (curr_elem == last_elem - 1) and (curr_event == last_event - 1):
                         """Skip check for subsequence obtained by removing last
                         event from last element, it's always frequent
                         """
@@ -249,7 +247,7 @@ class GSP:
                     element was removed from the candidate so it can be later
                     reinserted
                     """
-                    if len(candidate.elements[curr_elem]) == 1:
+                    if last_event == 1:
                         popped_item = candidate.elements.pop(curr_elem)
                         flag = 0
                     else:
@@ -274,11 +272,9 @@ class GSP:
                         candidate.elements.insert(curr_elem, popped_item)
 
                 if infrequent:
+                    self.candidate_sequences.remove(candidate)
                     break
                 starting_event = 0
-
-            if infrequent:
-                self.candidate_sequences.remove(candidate)
 
     def support_count(self):
         """Calculate support count for all k-candidates, add all frequent ones
@@ -315,17 +311,18 @@ class GSP:
         if self.verbose:
             logger.info(f"Checking if {c} is in {s}")
 
-        i = 0
+        c_iter = iter(c)
+        c_element = next(c_iter)
         for s_element in s:
             if self.verbose:
-                logger.info(f"Checking elements: {c[i]} in {s_element}")
+                logger.info(f"Checking elements: {c_element} in {s_element}")
 
-            if all(event in s_element for event in c[i]):
+            if set(c_element).issubset(s_element):
                 if self.verbose:
                     logger.info(f"Yes")
 
-                i += 1
-                if i == len(c):
+                if not (c_element := next(c_iter, [])):
+                    """If next returns empty list (default value)"""
                     return True
         return False
 
