@@ -1,6 +1,7 @@
 /.idea/
 /databases/
 /statistics/
+/venv/
 *.txt
 *.csv
 test.py
