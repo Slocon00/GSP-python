@@ -1,4 +1,5 @@
 from copy import deepcopy
+import math
 import logging
 
 """Logger for tracking execution on stdout"""
@@ -13,12 +14,17 @@ class GSP:
     equal than a minimum threshold.
     """
 
-    def __init__(self, db, minsup, verbose=False):
+    def __init__(self, db, minsup, maxgap=math.inf, mingap=1, maxspan=math.inf, verbose=False):
         """Initialize an instance of the class with a reference to the database
-        from which frequent sequences must be mined and a minsupport threshold
+        from which frequent sequences must be mined and a minsupport threshold,
+        and maxgap/mingap/maxspan time constraints.
         """
         self.db = db
         self.minsup = minsup
+        self.maxgap = maxgap
+        self.mingap = mingap
+        self.maxspan = maxspan
+
         self.frequent_sequences = {}
         self.candidate_sequences = []
         self.output = []

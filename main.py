@@ -1,4 +1,5 @@
 import argparse
+import math
 import sys
 import os.path
 import gsp
@@ -21,7 +22,10 @@ def setup_subparsers(parser):
     parser_gsp.add_argument('infile', help='input file')
     parser_gsp.add_argument('outfile', help='output file')
     parser_gsp.add_argument('minsup', type=float, help='minimum support')
-    parser_gsp.add_argument('-v', '--verbose', action='store_true',
+    parser_gsp.add_argument('-t', type=int, nargs=3, default=[math.inf, 1, math.inf],
+                            metavar=('maxgap', 'mingap', 'maxspan'), help='specify time constraints')
+
+    parser_gsp.add_argument('-v', '--verbose', action='store_true', default=False,
                             help='enable printing of debug messages')
 
     """Subparser for sequence database generator"""
@@ -33,7 +37,7 @@ def setup_subparsers(parser):
     parser_dbgen.add_argument('maxevents', type=int, help='max # of events in an element')
     parser_dbgen.add_argument('maxelems', type=int, help='max # of elements in a sequence')
     parser_dbgen.add_argument('-s', '--seed', default=None, help='seed for random event generation')
-    parser_dbgen.add_argument('-v', '--verbose', action='store_true',
+    parser_dbgen.add_argument('-v', '--verbose', action='store_true', default=False,
                               help='enable printing of debug messages')
 
 
@@ -68,7 +72,8 @@ def main(argv):
             sys.exit(1)
 
         """Running GSP algorithm"""
-        algo_obj = GSP(database, parsed_argv.minsup, parsed_argv.verbose)
+        algo_obj = GSP(database, parsed_argv.minsup, parsed_argv.t[0],
+                       parsed_argv.t[1], parsed_argv.t[2], parsed_argv.verbose)
         result = algo_obj.run_gsp()
 
         """Printing to output file"""
