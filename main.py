@@ -22,7 +22,7 @@ def setup_subparsers(parser):
     parser_gsp.add_argument('infile', help='input file')
     parser_gsp.add_argument('outfile', help='output file')
     parser_gsp.add_argument('minsup', type=float, help='minimum support')
-    parser_gsp.add_argument('-t', type=int, nargs=3, default=[math.inf, 1, math.inf],
+    parser_gsp.add_argument('-t', type=int, nargs=3, default=[math.inf, 0, math.inf],
                             metavar=('maxgap', 'mingap', 'maxspan'), help='specify time constraints')
 
     parser_gsp.add_argument('-v', '--verbose', action='store_true', default=False,

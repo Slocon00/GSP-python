@@ -14,7 +14,7 @@ class GSP:
     equal than a minimum threshold.
     """
 
-    def __init__(self, db, minsup, maxgap=math.inf, mingap=1, maxspan=math.inf, verbose=False):
+    def __init__(self, db, minsup, maxgap=math.inf, mingap=0, maxspan=math.inf, verbose=False):
         """Initialize an instance of the class with a reference to the database
         from which frequent sequences must be mined and a minsupport threshold,
         and maxgap/mingap/maxspan time constraints.
@@ -323,7 +323,7 @@ class GSP:
 
             if set(c_element).issubset(s_element):
                 if self.verbose:
-                    logger.info(f"Yes")
+                    logger.info("Yes")
 
                 if not (c_element := next(c_iter, [])):
                     """If next returns empty list (default value)"""
