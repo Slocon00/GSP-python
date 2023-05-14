@@ -315,19 +315,45 @@ class GSP:
         if self.verbose:
             logger.info(f"Checking if {c} is in {s}")
 
-        c_iter = iter(c)
-        c_element = next(c_iter)
-        for s_element in s:
-            if self.verbose:
-                logger.info(f"Checking elements: {c_element} in {s_element}")
-
-            if set(c_element).issubset(s_element):
-                if self.verbose:
-                    logger.info("Yes")
-
-                if not (c_element := next(c_iter, [])):
-                    """If next returns empty list (default value)"""
+        for start, s_element in enumerate(s):
+            """Check starts at first occurrence of the candidate's first element;
+            if not found, check continues from next occurrence
+            """
+            if set(c[0]).issubset(s_element):
+                """Candidate has only one element"""
+                if len(c) == 1:
                     return True
+
+                if self.verbose:
+                    logger.info(f"Found occurrence of {c[0]} at index {start}")
+
+                gap = 0
+                c_iter = iter(c)
+                """Calling next() to exclude first element"""
+                next(c_iter)
+                c_element = next(c_iter)
+                for i in range(start + 1, len(s)):
+                    if self.verbose:
+                        logger.info(f"Checking elements: {c_element} in {s[i]}")
+
+                    gap += 1
+                    if set(c_element).issubset(s[i]):
+                        if self.verbose:
+                            logger.info("Yes")
+
+                        if (gap > self.maxgap) or (gap <= self.mingap):
+                            if self.verbose:
+                                logger.info("maxgap/mingap time constraints violated")
+                            break
+
+                        if not (c_element := next(c_iter, [])):
+                            """If next returns empty list (default value)"""
+                            if (i - start) > self.maxspan:
+                                if self.verbose:
+                                    logger.info("maxspan time constraint violated")
+                                break
+                            return True
+                        gap = 0
         return False
 
     def print_frequent_sequences(self):
