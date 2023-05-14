@@ -95,13 +95,16 @@ class GSP:
                     event1 = sequence1.elements[0][0]
                     event2 = sequence2.elements[0][0]
 
-                    """If the merged candidate has too few possible sequences
-                    it could be contained in, it's immediately discarded
-                    """
-                    new_set_of_indexes = \
-                        sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
-                    if len(new_set_of_indexes) / n < self.minsup:
-                        continue
+                    if event1 == event2:
+                        new_set_of_indexes = sequence1.set_of_indexes
+                    else:
+                        """If the merged candidate has too few possible sequences
+                        it could be contained in, it's immediately discarded
+                        """
+                        new_set_of_indexes = \
+                            sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+                        if len(new_set_of_indexes) / n < self.minsup:
+                            continue
 
                     """Adds candidate [[event1], [event2]]"""
                     new_elements1 = [[event1], [event2]]
@@ -156,17 +159,16 @@ class GSP:
                 if key not in self.frequent_sequences:
                     continue
 
-                mergeable_candidates = self.frequent_sequences[key]
-                for sequence2 in mergeable_candidates:
-                    """If the merged candidate has too few possible sequences
-                    it could be contained in, it's immediately discarded
-                    """
-                    new_set_of_indexes = \
-                        sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
-                    if len(new_set_of_indexes) / n < self.minsup:
-                        continue
-
+                for sequence2 in self.frequent_sequences[key]:
                     if k == 3 or self.check_if_mergeable(sequence1.elements, sequence2.elements, starting_elem):
+                        """If the merged candidate has too few possible sequences
+                        it could be contained in, it's immediately discarded
+                        """
+                        new_set_of_indexes = \
+                            sequence1.set_of_indexes.intersection(sequence2.set_of_indexes)
+                        if len(new_set_of_indexes) / n < self.minsup:
+                            continue
+
                         new_elements = deepcopy(sequence1.elements)
 
                         if len(sequence2.elements[-1]) == 1:
@@ -191,11 +193,7 @@ class GSP:
         else:
             start = 0
 
-        stop = len(sequence2) - 1
-        for i in range(start, len(sequence1) - starting_elem1):
-            if i == stop:
-                break
-
+        for i in range(start, len(sequence2) - 1):
             if sequence1[i + starting_elem1] != sequence2[i]:
                 return False
 
