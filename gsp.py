@@ -436,7 +436,7 @@ def load_db(input_filename):
         path = open(input_filename, 'r')
     except FileNotFoundError:
         print("File", input_filename, "not found.")
-        return [], {}
+        return [], {}, {}
 
     str_to_int_dict = {}
     int_to_str_dict = {}

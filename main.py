@@ -1,7 +1,8 @@
 import argparse
-import math
 import sys
 import os.path
+import math
+
 import gsp
 from gsp import GSP
 from database_gen import DatabaseGenerator
