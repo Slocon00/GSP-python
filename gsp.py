@@ -369,40 +369,49 @@ class GSP:
             if not found, check continues from next occurrence
             """
             if set(c[0]).issubset(s_element):
-                """Candidate has only one element"""
-                if len(c) == 1:
-                    return True
-
                 if self.verbose:
-                    logger.info(f"Found occurrence of {c[0]} at index {start}")
-
+                    logger.info(f"Found {c[0]} at index {start}")
                 gap = 0
-                c_iter = iter(c)
-                """Calling next() to exclude first element"""
-                next(c_iter)
-                c_element = next(c_iter)
-                for i in range(start + 1, len(s)):
-                    if self.verbose:
-                        logger.info(f"Checking elements: {c_element} in {s[i]}")
+                j = 1
+                i = start + 1
+                """last_found and last_gap are used to recover information
+                about the state of the check for the previous element
+                """
+                last_found = 0
+                last_gap = 0
+                while i < len(s) and j < len(c):
 
                     gap += 1
-                    if set(c_element).issubset(s[i]):
-                        if self.verbose:
-                            logger.info("Yes")
-
-                        if (gap > self.maxgap) or (gap <= self.mingap):
+                    if j == len(c) - 1:
+                        if (i - start) > self.maxspan:
+                            """Check has to restart from the candidate's
+                            first element
+                            """
                             if self.verbose:
-                                logger.info("maxgap/mingap time constraints violated")
+                                logger.info("maxspan constraint violated")
                             break
+                    if gap > self.maxgap:
+                        if self.verbose:
+                            logger.info("maxgap constraint violated")
+                        if j == 1:
+                            break
+                        j -= 1
+                        i = last_found + 1
+                        gap = last_gap
+                        continue
 
-                        if not (c_element := next(c_iter, [])):
-                            """If next returns empty list (default value)"""
-                            if (i - start) > self.maxspan:
-                                if self.verbose:
-                                    logger.info("maxspan time constraint violated")
-                                break
-                            return True
+                    if self.verbose:
+                        logger.info(f"Checking {c[j]} in {s[i]}")
+
+                    if set(c[j]).issubset(s[i]) and (gap > self.mingap):
+                        last_found = i
+                        last_gap = gap
                         gap = 0
+                        j += 1
+                    i += 1
+
+                if j == len(c):
+                    return True
         return False
 
     def print_frequent_sequences(self):
