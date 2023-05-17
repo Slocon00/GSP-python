@@ -20,7 +20,6 @@ class DatabaseGenerator:
             seed:       the seed to be used for random number generation (if not
                         provided, random's default choice of seed is used)
         """
-        self.output = []
 
         self.size = size
         self.nevents = nevents
@@ -46,6 +45,7 @@ class DatabaseGenerator:
             logger.disabled = True
 
     def generate_sequence_database(self):
+        output = []
         """Generate a simple sequence database"""
         for i in range(self.size):
             sequence = []
@@ -80,6 +80,6 @@ class DatabaseGenerator:
                 sequence.append(sorted_element)
 
             logger.info(f"Sequence: {sequence}")
-            self.output.append(sequence)
+            output.append(sequence)
 
-        return self.output
+        return output
