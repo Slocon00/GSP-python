@@ -11,12 +11,12 @@ class DatabaseGenerator:
     with a specific set of parameters.
     """
 
-    def __init__(self, size, nevents, maxevents, maxelems, seed=None, verbose=False):
+    def __init__(self, size, nevents, maxevents, avgelems, seed=None, verbose=False):
         """Initialize an instance with the given requirements:
             size: overall number of sequences in the database
             nevents:    number of unique events in the database
             maxevents:  max number of events contained in a single element
-            maxelems:   max number of elements contained in a single sequence
+            avgelems:   average number of elements contained in a single sequence
             seed:       the seed to be used for random number generation (if not
                         provided, random's default choice of seed is used)
         """
@@ -24,16 +24,20 @@ class DatabaseGenerator:
 
         self.size = size
         self.nevents = nevents
-        self.maxevents = maxevents
-        self.maxelems = maxelems
+
+        if maxevents > nevents:
+            self.maxevents = nevents
+        else:
+            self.maxevents = maxevents
+        self.avgelems = avgelems
 
         """mu and sigma values for normal distribution"""
-        self.mu_size = self.maxelems*3/4
-        self.mu_elem = self.maxevents*3/4
-        self.mu_event = self.nevents*3/4
-        self.s_size = 1.5
-        self.s_elem = self.maxevents*3/4
-        self.s_event = self.nevents*3/4
+        self.mu_length = self.avgelems
+        self.mu_elem = self.maxevents * 3 / 4
+        self.mu_event = self.nevents * 3 / 4
+        self.s_length = 2
+        self.s_elem = self.maxevents * 3 / 4
+        self.s_event = self.nevents * 3 / 4
 
         if seed is not None:
             random.seed(seed)
@@ -48,8 +52,8 @@ class DatabaseGenerator:
 
             """Generate a random length for the sequence"""
             seq_length = 0
-            while (seq_length < 1) | (seq_length > self.maxelems):
-                seq_length = math.floor(random.normalvariate(self.mu_size, self.s_size) + 0.5)
+            while seq_length < 1:
+                seq_length = math.floor(random.normalvariate(self.mu_length, self.s_length) + 0.5)
                 logger.info(f"random seq_length: {seq_length}")
 
             for j in range(seq_length):

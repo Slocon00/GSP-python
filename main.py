@@ -35,7 +35,7 @@ def setup_subparsers(parser):
     parser_dbgen.add_argument('size', type=int, help='# of sequences')
     parser_dbgen.add_argument('nevents', type=int, help='# of unique events')
     parser_dbgen.add_argument('maxevents', type=int, help='max # of events in an element')
-    parser_dbgen.add_argument('maxelems', type=int, help='max # of elements in a sequence')
+    parser_dbgen.add_argument('avgelems', type=int, help='average # of elements in a sequence')
     parser_dbgen.add_argument('-s', '--seed', default=None, help='seed for random event generation')
     parser_dbgen.add_argument('-v', '--verbose', action='store_true', default=False,
                               help='enable printing of debug messages')
@@ -99,7 +99,7 @@ def main(argv):
 
         """Generating database"""
         algo_obj = DatabaseGenerator(parsed_argv.size, parsed_argv.nevents,
-                                     parsed_argv.maxevents, parsed_argv.maxelems,
+                                     parsed_argv.maxevents, parsed_argv.avgelems,
                                      parsed_argv.seed, parsed_argv.verbose)
         result = algo_obj.generate_sequence_database()
 

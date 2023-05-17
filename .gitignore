@@ -1,6 +1,7 @@
 /.idea/
-/databases/
+/datasets/
 /statistics/
+/statistics_old/
 /venv/
 *.txt
 *.csv
