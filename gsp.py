@@ -183,8 +183,10 @@ class GSP:
                             logger.info(f"{new_candidate.elements}")
 
     def check_if_mergeable(self, sequence1, sequence2, starting_elem1):
-        """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
-        candidate k-sequence"""
+        if len(sequence1) == 1 and len(sequence2) == 1:
+            if sequence1[0][1:] != sequence2[0][:-1]:
+                return False
+            return True
 
         if starting_elem1 == 0:
             if sequence1[0][1:] != sequence2[0]:
