@@ -429,27 +429,25 @@ def load_db(input_filename):
         print("File", input_filename, "not found.")
         return []
 
-    content = path.read()
-    strings = content.split()
-
     database = []
     sequence = []
     element = []
 
-    for string in strings:
-        if string == "-2":
-            """String marks end of sequence"""
-            database.append(sequence)
-            sequence = []
-            element = []
-        elif string == "-1":
-            """String marks end of element"""
-            sequence.append(element)
-            element = []
-        else:
-            """String is an event"""
-            event = int(string)
-            element.append(event)
+    for line in path:
+        for string in line.split():
+            if string == "-2":
+                """String marks end of sequence"""
+                database.append(sequence)
+                sequence = []
+                element = []
+            elif string == "-1":
+                """String marks end of element"""
+                sequence.append(element)
+                element = []
+            else:
+                """String is an event"""
+                event = int(string)
+                element.append(event)
     path.close()
     return database
 
