@@ -183,6 +183,8 @@ class GSP:
                             logger.info(f"{new_candidate.elements}")
 
     def check_if_mergeable(self, sequence1, sequence2, starting_elem1):
+        """Check if k-1-sequence1 can be merged with k-1-sequence2 to produce a
+        candidate k-sequence"""
         if len(sequence1) == 1 and len(sequence2) == 1:
             if sequence1[0][1:] != sequence2[0][:-1]:
                 return False
@@ -369,5 +371,9 @@ class Sequence:
     """
 
     def __init__(self, elements, set_of_indexes):
+        """Initialize an instance of the class with a reference to the elements
+        of the sequence and the set of database indexes corresponding to the
+        database sequences the sequence could appear in
+        """
         self.elements = elements
         self.set_of_indexes = set_of_indexes
