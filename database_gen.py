@@ -23,6 +23,7 @@ class DatabaseGenerator:
 
         self.size = size
         self.nevents = nevents
+        self.verbose = verbose
 
         if maxevents > nevents:
             self.maxevents = nevents
@@ -45,8 +46,8 @@ class DatabaseGenerator:
             logger.disabled = True
 
     def generate_sequence_database(self):
+        """Generate a sequence database"""
         output = []
-        """Generate a simple sequence database"""
         for i in range(self.size):
             sequence = []
 
@@ -54,7 +55,9 @@ class DatabaseGenerator:
             seq_length = 0
             while seq_length < 1:
                 seq_length = math.floor(random.normalvariate(self.mu_length, self.s_length) + 0.5)
-                logger.info(f"random seq_length: {seq_length}")
+
+                if self.verbose:
+                    logger.info(f"random seq_length: {seq_length}")
 
             for j in range(seq_length):
                 """Element must not contain duplicate events, events are sorted
@@ -66,7 +69,9 @@ class DatabaseGenerator:
                 elem_length = 0
                 while (elem_length < 1) | (elem_length > self.maxevents):
                     elem_length = math.floor(random.normalvariate(self.mu_elem, self.s_elem) + 0.5)
-                    logger.info(f"random elem_length: {elem_length}")
+
+                    if self.verbose:
+                        logger.info(f"random elem_length: {elem_length}")
 
                 while len(element) < elem_length:
                     event = -1
@@ -74,12 +79,16 @@ class DatabaseGenerator:
                         event = math.floor(random.normalvariate(self.mu_event, self.s_event) + 0.5)
                     element.add(event)
 
-                logger.info(f"Element: {element}")
+                if self.verbose:
+                    logger.info(f"Element: {element}")
+
                 sorted_element = list(element)
                 sorted_element.sort()
                 sequence.append(sorted_element)
 
-            logger.info(f"Sequence: {sequence}")
+            if self.verbose:
+                logger.info(f"Sequence: {sequence}")
+
             output.append(sequence)
 
         return output
