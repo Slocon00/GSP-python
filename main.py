@@ -32,6 +32,7 @@ def setup_subparsers(parser):
     parser_dbgen.add_argument('nevents', type=int, help='# of unique events')
     parser_dbgen.add_argument('maxevents', type=int, help='max # of events in an element')
     parser_dbgen.add_argument('avgelems', type=int, help='average # of elements in a sequence')
+    parser_dbgen.add_argument('--items', help='file specifying the items the database will contain (one per line)')
     parser_dbgen.add_argument('-s', '--seed', help='seed for random event generation')
     parser_dbgen.add_argument('-v', '--verbose', action='store_true',
                               help='enable printing of debug messages')
@@ -80,6 +81,31 @@ def main(argv):
             output.write(f"#SUP: {sequence_info[1]}\n")
 
     elif parsed_argv.subcommand == "DatabaseGen":
+
+        dictionary = {}
+        """Checking input file (for items)"""
+        if parsed_argv.items is not None:
+            if not os.path.exists(parsed_argv.items):
+                print("File", parsed_argv.items, "not found.")
+                sys.exit(1)
+            else:
+                items = []
+                for line in open(parsed_argv.items):
+                    items.append(line.strip())
+
+                if len(items) < parsed_argv.nevents:
+                    print("Number of items in", parsed_argv.items,
+                          "is less than the requested number of unique events.")
+                    sys.exit(1)
+
+                items.sort()
+
+                """Each item is matched to an integer"""
+                key = 1
+                for item in items:
+                    dictionary[key] = item
+                    key += 1
+
         """Checking output file"""
         if os.path.exists(parsed_argv.outfile):
             print("File", parsed_argv.outfile, "already exists, want to proceed? [Y/N]")
@@ -90,7 +116,7 @@ def main(argv):
                 if answer in ["N", "n"]:
                     print("Quitting")
                     sys.exit()
-        output_path = open(parsed_argv.outfile, 'w')
+        output = open(parsed_argv.outfile, 'w')
 
         """Generating database"""
         algo_obj = DatabaseGenerator(parsed_argv.size, parsed_argv.nevents,
@@ -102,9 +128,12 @@ def main(argv):
         for sequence in result:
             for element in sequence:
                 for event in element:
-                    output_path.write(f"{event} ")
-                output_path.write("-1 ")
-            output_path.write("-2\n")
+                    if dictionary:
+                        output.write(f"{dictionary[event]} ")
+                    else:
+                        output.write(f"{event} ")
+                output.write("-1 ")
+            output.write("-2\n")
 
 
 if __name__ == "__main__":
