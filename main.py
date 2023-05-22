@@ -32,7 +32,7 @@ def setup_subparsers(parser):
     parser_dbgen.add_argument('nevents', type=int, help='# of unique events')
     parser_dbgen.add_argument('maxevents', type=int, help='max # of events in an element')
     parser_dbgen.add_argument('avgelems', type=int, help='average # of elements in a sequence')
-    parser_dbgen.add_argument('-s', '--seed', default=None, help='seed for random event generation')
+    parser_dbgen.add_argument('-s', '--seed', help='seed for random event generation')
     parser_dbgen.add_argument('-v', '--verbose', action='store_true',
                               help='enable printing of debug messages')
 
@@ -45,7 +45,7 @@ def main(argv):
 
     if parsed_argv.subcommand == "GSP":
         """Loading database from input file"""
-        database = gsp.load_db(parsed_argv.infile)
+        database, dictionary = gsp.load_db(parsed_argv.infile)
         if not database:
             print("Could not load database from input file")
             sys.exit(1)
@@ -60,7 +60,7 @@ def main(argv):
                 if answer in ["N", "n"]:
                     print("Quitting")
                     sys.exit()
-        output_path = open(parsed_argv.outfile, 'w')
+        output = open(parsed_argv.outfile, 'w')
 
         """Checking min support"""
         if (parsed_argv.minsup < 0) | (parsed_argv.minsup > 1):
@@ -75,9 +75,9 @@ def main(argv):
         for sequence_info in result:
             for element in sequence_info[0]:
                 for event in element:
-                    output_path.write(f"{event} ")
-                output_path.write("-1 ")
-            output_path.write(f"#SUP: {sequence_info[1]}\n")
+                    output.write(f"{dictionary[event]} ")
+                output.write("-1 ")
+            output.write(f"#SUP: {sequence_info[1]}\n")
 
     elif parsed_argv.subcommand == "DatabaseGen":
         """Checking output file"""
