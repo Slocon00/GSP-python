@@ -14,7 +14,7 @@ class GSP:
     equal than a minimum threshold.
     """
 
-    def __init__(self, db, minsup, maxgap=math.inf, mingap=0, maxspan=math.inf, verbose=False):
+    def __init__(self, db, minsup, max_k=math.inf, maxgap=math.inf, mingap=0, maxspan=math.inf, verbose=False):
         """Initialize an instance of the class with a reference to the database
         from which frequent sequences must be mined and a minsupport threshold,
         and maxgap/mingap/maxspan time constraints.
@@ -28,6 +28,8 @@ class GSP:
         self.frequent_sequences = {}
         self.candidate_sequences = []
         self.output = []
+
+        self.max_k = max_k
 
         self.verbose = verbose
         if not verbose:
@@ -57,13 +59,11 @@ class GSP:
             else:
                 if self.verbose:
                     logger.info(f"Event: {event} - Support count: {support_count}")
+        self.print_frequent_sequences()
 
         k = 2
         """Loop until there are no more frequent k-sequences"""
-        while self.frequent_sequences:
-            """All frequent k-1-sequences get printed to the output file"""
-            self.print_frequent_sequences()
-
+        while self.frequent_sequences and (k <= self.max_k):
             """Generate and prune all candidate k-sequences"""
             self.generate_candidates(k)
 
@@ -79,6 +79,10 @@ class GSP:
 
             """Clear candidate sequences for next iteration"""
             self.candidate_sequences.clear()
+
+            """All frequent k-1-sequences get printed to the output file"""
+            self.print_frequent_sequences()
+
             k += 1
 
         return self.output
