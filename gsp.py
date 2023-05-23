@@ -344,6 +344,7 @@ def load_db(input_filename):
         return [], {}
 
     str_to_int_dict = {}
+    int_to_str_dict = {}
     events = set()
     for line in path:
         for string in line.split():
@@ -356,6 +357,7 @@ def load_db(input_filename):
     integer_conv = 1
     for event in events:
         str_to_int_dict[event] = integer_conv
+        int_to_str_dict[integer_conv] = event
         integer_conv += 1
 
     path.seek(0, 0)
@@ -381,8 +383,7 @@ def load_db(input_filename):
                 element.append(event)
 
     path.close()
-    int_to_str_dict = {val: key for key, val in str_to_int_dict.items()}
-    return database, int_to_str_dict
+    return database, int_to_str_dict, str_to_int_dict
 
 
 class Sequence:
