@@ -6,6 +6,7 @@ import gsp
 from gsp import GSP
 from database_gen import DatabaseGenerator
 import logging
+
 logging.basicConfig(level=logging.NOTSET, stream=sys.stdout,
                     format="%(levelname)s:%(module)s:%(message)s", force=True)
 
@@ -22,6 +23,8 @@ def setup_subparsers(parser):
     parser_gsp.add_argument('infile', help='input file')
     parser_gsp.add_argument('outfile', help='output file')
     parser_gsp.add_argument('minsup', type=float, help='minimum support')
+    parser_gsp.add_argument('--maxk', type=int, default=math.inf,
+                            help='maximum size of frequent sequences found')
     parser_gsp.add_argument('-t', type=int, nargs=3, default=[math.inf, 0, math.inf],
                             metavar=('maxgap', 'mingap', 'maxspan'), help='specify time constraints')
 
@@ -50,7 +53,7 @@ def main(argv):
 
     if parsed_argv.subcommand == "GSP":
         """Loading database from input file"""
-        database, dictionary = gsp.load_db(parsed_argv.infile)
+        database, int_to_str_dict, str_to_int_dict = gsp.load_db(parsed_argv.infile)
         if not database:
             print("Could not load database from input file")
             sys.exit(1)
@@ -73,7 +76,7 @@ def main(argv):
             sys.exit(1)
 
         """Running GSP algorithm"""
-        algo_obj = GSP(database, parsed_argv.minsup, parsed_argv.t[0],
+        algo_obj = GSP(database, parsed_argv.minsup, parsed_argv.maxk, parsed_argv.t[0],
                        parsed_argv.t[1], parsed_argv.t[2], parsed_argv.verbose)
         result = algo_obj.run_gsp()
 
@@ -81,7 +84,7 @@ def main(argv):
         for sequence_info in result:
             for element in sequence_info[0]:
                 for event in element:
-                    output.write(f"{dictionary[event]} ")
+                    output.write(f"{int_to_str_dict[event]} ")
                 output.write("-1 ")
             output.write(f"#SUP: {sequence_info[1]}\n")
 
