@@ -445,9 +445,6 @@ def load_db(input_filename):
             if string != "-1" and string != "-2":
                 events.add(string)
 
-    events = list(events)
-    events.sort()
-
     integer_conv = 1
     for event in events:
         str_to_int_dict[event] = integer_conv
