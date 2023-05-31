@@ -27,7 +27,6 @@ class GSP:
 
         self.frequent_sequences = {}
         self.candidate_sequences = []
-        self.output = []
 
         self.max_k = max_k
 
@@ -44,6 +43,8 @@ class GSP:
                     self.frequent_sequences[event][0].set_of_indexes.add(index)
 
     def run_gsp(self):
+        output = []
+
         """Run GSP algorithm"""
         if self.verbose:
             logger.info("STARTING GSP ALGORITHM\n")
@@ -59,7 +60,7 @@ class GSP:
             else:
                 if self.verbose:
                     logger.info(f"Event: {event} - Support count: {support_count}")
-        self.print_frequent_sequences()
+        self.print_frequent_sequences(output)
 
         k = 2
         """Loop until there are no more frequent k-sequences"""
@@ -81,11 +82,11 @@ class GSP:
             self.candidate_sequences.clear()
 
             """All frequent k-1-sequences get printed to the output file"""
-            self.print_frequent_sequences()
+            self.print_frequent_sequences(output)
 
             k += 1
 
-        return self.output
+        return output
 
     def generate_candidates(self, k):
         """Generate all candidate k-sequences from frequent k-1-sequences"""
@@ -422,11 +423,11 @@ class GSP:
                     return True
         return False
 
-    def print_frequent_sequences(self):
+    def print_frequent_sequences(self, output):
         """Add current frequent sequences to output list"""
         for sequence_list in self.frequent_sequences.values():
             for sequence in sequence_list:
-                self.output.append((sequence.elements, len(sequence.set_of_indexes)))
+                output.append((sequence.elements, len(sequence.set_of_indexes)))
 
 
 def load_db(input_filename):
@@ -439,23 +440,12 @@ def load_db(input_filename):
 
     str_to_int_dict = {}
     int_to_str_dict = {}
-    events = set()
-    for line in path:
-        for string in line.split():
-            if string != "-1" and string != "-2":
-                events.add(string)
-
-    integer_conv = 1
-    for event in events:
-        str_to_int_dict[event] = integer_conv
-        int_to_str_dict[integer_conv] = event
-        integer_conv += 1
-
-    path.seek(0, 0)
 
     database = []
     sequence = []
     element = []
+
+    integer_conv = 1
 
     for line in path:
         for string in line.split():
@@ -470,6 +460,10 @@ def load_db(input_filename):
                 element = []
             else:
                 """String is an event"""
+                if string not in str_to_int_dict:
+                    str_to_int_dict[string] = integer_conv
+                    int_to_str_dict[integer_conv] = string
+                    integer_conv += 1
                 event = str_to_int_dict[string]
                 element.append(event)
 
