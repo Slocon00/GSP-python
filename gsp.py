@@ -60,7 +60,7 @@ class GSP:
             else:
                 if self.verbose:
                     logger.info(f"Event: {event} - Support count: {support_count}")
-        self.print_frequent_sequences(output)
+        self.add_frequent_sequences(output)
 
         k = 2
         """Loop until there are no more frequent k-sequences"""
@@ -81,8 +81,8 @@ class GSP:
             """Clear candidate sequences for next iteration"""
             self.candidate_sequences.clear()
 
-            """All frequent k-1-sequences get printed to the output file"""
-            self.print_frequent_sequences(output)
+            """All frequent k-1-sequences get printed to the output"""
+            self.add_frequent_sequences(output)
 
             k += 1
 
@@ -423,7 +423,7 @@ class GSP:
                     return True
         return False
 
-    def print_frequent_sequences(self, output):
+    def add_frequent_sequences(self, output):
         """Add current frequent sequences to output list"""
         for sequence_list in self.frequent_sequences.values():
             for sequence in sequence_list:
