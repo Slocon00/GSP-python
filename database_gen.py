@@ -54,7 +54,7 @@ class DatabaseGenerator:
             """Generate a random length for the sequence"""
             seq_length = 0
             while seq_length < 1:
-                seq_length = math.floor(random.normalvariate(self.mu_length, self.s_length) + 0.5)
+                seq_length = math.floor(random.gauss(self.mu_length, self.s_length) + 0.5)
 
                 if self.verbose:
                     logger.info(f"random seq_length: {seq_length}")
@@ -68,7 +68,7 @@ class DatabaseGenerator:
                 """Generate a random length for the element"""
                 elem_length = 0
                 while (elem_length < 1) | (elem_length > self.maxevents):
-                    elem_length = math.floor(random.normalvariate(self.mu_elem, self.s_elem) + 0.5)
+                    elem_length = math.floor(random.gauss(self.mu_elem, self.s_elem) + 0.5)
 
                     if self.verbose:
                         logger.info(f"random elem_length: {elem_length}")
@@ -76,7 +76,7 @@ class DatabaseGenerator:
                 while len(element) < elem_length:
                     event = -1
                     while (event < 1) | (event > self.nevents):
-                        event = math.floor(random.normalvariate(self.mu_event, self.s_event) + 0.5)
+                        event = math.floor(random.gauss(self.mu_event, self.s_event) + 0.5)
                     element.add(event)
 
                 if self.verbose:
