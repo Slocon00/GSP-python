@@ -224,7 +224,7 @@ class GSP:
         if self.verbose:
             logger.info("*** Pruning candidates ***")
 
-        if self.maxgap == math.inf:
+        if (self.maxgap == math.inf) and (self.mingap == 0) and (self.maxspan == math.inf):
             prune = self.prune_without_time_constraints
         else:
             prune = self.prune_with_time_constraints
@@ -345,11 +345,16 @@ class GSP:
             logger.info("*** Calculating support count ***")
             logger.info("*** Frequent sequences found: ***")
 
+        if (self.maxgap == math.inf) and (self.mingap == 0) and (self.maxspan == math.inf):
+            is_contained = self.is_contained_without_time_constraints
+        else:
+            is_contained = self.is_contained_with_time_constraints
+
         n = len(self.db)
         for candidate in self.candidate_sequences:
             infrequent = False
             for index in list(candidate.set_of_indexes):
-                if not self.is_contained(candidate.elements, self.db[index]):
+                if not is_contained(candidate.elements, self.db[index]):
                     candidate.set_of_indexes.discard(index)
                     if len(candidate.set_of_indexes) / n < self.minsup:
                         infrequent = True
@@ -368,7 +373,27 @@ class GSP:
             if not self.frequent_sequences[event]:
                 del self.frequent_sequences[event]
 
-    def is_contained(self, c, s):
+    def is_contained_without_time_constraints(self, c, s):
+        """Check if candidate c is contained in sequence s"""
+        if self.verbose:
+            logger.info(f"Checking if {c} is in {s}")
+
+        c_iter = iter(c)
+        c_element = next(c_iter)
+        for s_element in s:
+            if self.verbose:
+                logger.info(f"Checking elements: {c_element} in {s_element}")
+
+            if set(c_element).issubset(s_element):
+                if self.verbose:
+                    logger.info(f"Yes")
+
+                if not (c_element := next(c_iter, [])):
+                    """If next returns empty list (default value)"""
+                    return True
+        return False
+
+    def is_contained_with_time_constraints(self, c, s):
         """Check if candidate c is contained in sequence s"""
         if self.verbose:
             logger.info(f"Checking if {c} is in {s}")
