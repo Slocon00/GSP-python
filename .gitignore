@@ -5,6 +5,7 @@
 /statistics/
 /statistics_old/
 /venv/
+/venv3.9/
 *.txt
 *.csv
 test.py
