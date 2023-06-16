@@ -273,10 +273,8 @@ class GSP:
                 """
                 if last_event == 1:
                     popped_item = candidate.pop(curr_elem)
-                    flag = 0
                 else:
                     popped_item = candidate[curr_elem].pop(curr_event)
-                    flag = 1
 
                 if self.verbose:
                     logger.info(f"\tSubsequence: {candidate}")
@@ -289,10 +287,10 @@ class GSP:
                         logger.info("\tInfrequent")
                     return False
 
-                if flag:
-                    candidate[curr_elem].insert(curr_event, popped_item)
-                else:
+                if last_event == 1:
                     candidate.insert(curr_elem, popped_item)
+                else:
+                    candidate[curr_elem].insert(curr_event, popped_item)
             starting_event = 0
 
         if self.verbose:
