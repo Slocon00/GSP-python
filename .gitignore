@@ -3,8 +3,8 @@
 /datasets/
 /items/
 /statistics/
-/statistics_old/
 /venv/
 *.txt
 *.csv
 test.py
+/venv3.9/
