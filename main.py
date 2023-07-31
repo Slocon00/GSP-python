@@ -94,7 +94,7 @@ def main(argv):
                 output.write("-1 ")
             output.write(f"#SUP: {sequence_info[1]}\n")
 
-    elif parsed_argv.subcommand == "DatabaseGen":
+    elif parsed_argv.subcommand == "DatasetGen":
 
         dictionary = {}
         """Checking input file (for items)"""
@@ -133,9 +133,9 @@ def main(argv):
         output = open(parsed_argv.outfile, 'w')
 
         """Generating dataset"""
-        algo_obj = DatabaseGenerator(parsed_argv.size, parsed_argv.nevents,
-                                     parsed_argv.maxevents, parsed_argv.avgelems,
-                                     parsed_argv.seed, parsed_argv.verbose)
+        algo_obj = DatasetGenerator(parsed_argv.size, parsed_argv.nevents,
+                                    parsed_argv.maxevents, parsed_argv.avgelems,
+                                    parsed_argv.seed, parsed_argv.verbose)
         result = algo_obj.generate_sequence_dataset()
 
         """Printing to output file"""
