@@ -224,6 +224,9 @@ class GSP:
         if self.verbose:
             logger.info("*** Pruning candidates ***")
 
+        """Maxgap constraint violates Apriori principle, if a value is given
+        for it, pruning strategy must be chosen accordingly
+        """
         if self.maxgap == math.inf:
             prune = self.prune_without_time_constraints
         else:
@@ -305,6 +308,7 @@ class GSP:
         last_elem = len(candidate)
         for curr_elem in range(starting_elem, last_elem):
             if len(candidate[curr_elem]) == 1:
+                """If element has only one event, skip its removal"""
                 continue
 
             last_event = len(candidate[curr_elem])
@@ -366,7 +370,7 @@ class GSP:
                 logger.info(f"Sequence: {candidate.elements}")
                 logger.info(f"Support count: {len(candidate.set_of_indexes)}")
 
-        """Keys that correspond to an empty list are removed from frequent_sequences"""
+        """Keys paired to an empty list are removed from frequent_sequences"""
         for event in list(self.frequent_sequences):
             if not self.frequent_sequences[event]:
                 del self.frequent_sequences[event]
@@ -387,7 +391,9 @@ class GSP:
                     logger.info(f"Yes")
 
                 if not (c_element := next(c_iter, [])):
-                    """If next returns empty list (default value)"""
+                    """If next returns empty list (default value), all of the
+                    elements of the candidate have been found
+                    """
                     return True
         return False
 
@@ -401,6 +407,7 @@ class GSP:
             if not found, check continues from next occurrence
             """
             if set(c[0]).issubset(s_element):
+                """Start of ''Forward phase'' from first element"""
                 if self.verbose:
                     logger.info(f"Found {c[0]} at index {start}")
                 gap = 0
@@ -416,15 +423,19 @@ class GSP:
                     gap += 1
                     if j == len(c) - 1:
                         if (i - start) > self.maxspan:
-                            """Check has to restart from the candidate's
-                            first element
+                            """Start of ''backward phase'' for maxspan violation,
+                            check has to restart from the candidate's first
+                            element
                             """
                             if self.verbose:
                                 logger.info("maxspan constraint violated")
                             break
+
                     if gap > self.maxgap:
+                        """Start of ''backward phase'' for maxgap violation"""
                         if self.verbose:
                             logger.info("maxgap constraint violated")
+
                         if j == 1:
                             break
                         j -= 1
@@ -454,7 +465,9 @@ class GSP:
 
 
 def load_db(input_filename):
-    """Return the sequence database contained in input_filename"""
+    """Return the sequence database contained in input_filename, converting
+    all events found to integers
+    """
     try:
         path = open(input_filename, 'r')
     except FileNotFoundError:
