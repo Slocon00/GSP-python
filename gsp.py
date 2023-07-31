@@ -410,6 +410,7 @@ class GSP:
                 """Start of ''Forward phase'' from first element"""
                 if self.verbose:
                     logger.info(f"Found {c[0]} at index {start}")
+
                 gap = 0
                 j = 1
                 i = start + 1
@@ -418,17 +419,18 @@ class GSP:
                 """
                 last_found = 0
                 last_gap = 0
+
                 while i < len(s) and j < len(c):
 
                     gap += 1
-                    if j == len(c) - 1:
-                        if (i - start) > self.maxspan:
-                            """Start of ''backward phase'' for maxspan violation,
-                            check has to restart from the candidate's first
-                            element
-                            """
-                            if self.verbose:
-                                logger.info("maxspan constraint violated")
+
+                    if (i - start) > self.maxspan:
+                        """Start of ''backward phase'' for maxspan violation,
+                        check has to restart from the candidate's first
+                        element
+                        """
+                        if self.verbose:
+                            logger.info("maxspan constraint violated")
                             break
 
                     if gap > self.maxgap:
@@ -437,6 +439,9 @@ class GSP:
                             logger.info("maxgap constraint violated")
 
                         if j == 1:
+                            """Current element is the second one, restart search
+                            from first (outside of loop)
+                            """
                             break
                         j -= 1
                         i = last_found + 1
