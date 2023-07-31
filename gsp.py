@@ -14,12 +14,17 @@ class GSP:
     equal than a minimum threshold.
     """
 
-    def __init__(self, db, minsup, max_k=math.inf, verbose=False):
+    def __init__(self, db, minsup, max_k=math.inf, maxgap=math.inf, mingap=0, maxspan=math.inf, verbose=False):
         """Initialize an instance of the class with a reference to the database
-        from which frequent sequences must be mined and a minsupport threshold
+        from which frequent sequences must be mined and a minsupport threshold,
+        and maxgap/mingap/maxspan time constraints.
         """
         self.db = db
         self.minsup = minsup
+        self.maxgap = maxgap
+        self.mingap = mingap
+        self.maxspan = maxspan
+
         self.frequent_sequences = {}
         self.candidate_sequences = []
 
@@ -219,6 +224,14 @@ class GSP:
         if self.verbose:
             logger.info("*** Pruning candidates ***")
 
+        """Maxgap constraint violates Apriori principle, if a value is given
+        for it, pruning strategy must be chosen accordingly
+        """
+        if self.maxgap == math.inf:
+            prune = self.prune_without_time_constraints
+        else:
+            prune = self.prune_with_time_constraints
+
         for candidate in list(self.candidate_sequences):
             if self.verbose:
                 logger.info(f"Candidate: {candidate.elements}")
@@ -239,61 +252,111 @@ class GSP:
             for sequence in self.frequent_sequences[key]:
                 frequent_sequences_list.append(sequence.elements)
 
-            infrequent = False
-            last_elem = len(candidate.elements)
-            for curr_elem in range(starting_elem, last_elem):
-                last_event = len(candidate.elements[curr_elem])
-                for curr_event in range(starting_event, last_event):
+            if not prune(candidate.elements, starting_elem, starting_event, frequent_sequences_list):
+                self.candidate_sequences.remove(candidate)
 
-                    if (curr_elem == last_elem - 1) and (curr_event == last_event - 1):
-                        """Skip check for subsequence obtained by removing last
-                        event from last element, it's always frequent
-                        """
-                        break
+    def prune_without_time_constraints(self, candidate, starting_elem, starting_event, frequent_sequences_list):
+        """Check if candidate sequence contains at least one infrequent
+        subsequence
+        """
 
-                    """flag is used to mark whether a single event or a whole
-                    element was removed from the candidate so it can be later
-                    reinserted
+        last_elem = len(candidate)
+        for curr_elem in range(starting_elem, last_elem):
+            last_event = len(candidate[curr_elem])
+            for curr_event in range(starting_event, last_event):
+                if (curr_elem == last_elem - 1) and (curr_event == last_event - 1):
+                    """Skip check for subsequence obtained by removing last
+                    event from last element, it's always frequent
                     """
-                    if last_event == 1:
-                        popped_item = candidate.elements.pop(curr_elem)
-                    else:
-                        popped_item = candidate.elements[curr_elem].pop(curr_event)
+                    return True
 
+                """flag is used to mark whether a single event or a whole
+                element was removed from the candidate so it can be later
+                reinserted
+                """
+                if last_event == 1:
+                    popped_item = candidate.pop(curr_elem)
+                else:
+                    popped_item = candidate[curr_elem].pop(curr_event)
+
+                if self.verbose:
+                    logger.info(f"\tSubsequence: {candidate}")
+
+                if candidate not in frequent_sequences_list:
+                    """If one of the k-1 subsequences is infrequent, the
+                    candidate is pruned
+                    """
                     if self.verbose:
-                        logger.info(f"\tSubsequence: {candidate.elements}")
+                        logger.info("\tInfrequent")
+                    return False
 
-                    if candidate.elements not in frequent_sequences_list:
-                        """If one of the k-1 subsequences is infrequent, the
-                        candidate is pruned
-                        """
-                        if self.verbose:
-                            logger.info("\tInfrequent")
-                        infrequent = True
-                        break
+                if last_event == 1:
+                    candidate.insert(curr_elem, popped_item)
+                else:
+                    candidate[curr_elem].insert(curr_event, popped_item)
+            starting_event = 0
 
-                    if last_event == 1:
-                        candidate.elements.insert(curr_elem, popped_item)
-                    else:
-                        candidate.elements[curr_elem].insert(curr_event, popped_item)
+        if self.verbose:
+            logger.info("\tAll subsequences are frequent")
+        return True
 
-                if infrequent:
-                    self.candidate_sequences.remove(candidate)
-                    break
-                starting_event = 0
+    def prune_with_time_constraints(self, candidate, starting_elem, starting_event, frequent_sequences_list):
+        """Check if candidate sequence contains at least one infrequent
+        contiguous subsequence
+        """
+
+        last_elem = len(candidate)
+        for curr_elem in range(starting_elem, last_elem):
+            if len(candidate[curr_elem]) == 1:
+                """If element has only one event, skip its removal"""
+                continue
+
+            last_event = len(candidate[curr_elem])
+            for curr_event in range(starting_event, last_event):
+                if (curr_elem == last_elem - 1) and (curr_event == last_event - 1):
+                    """Skip check for subsequence obtained by removing last
+                    event from last element, it's always frequent
+                    """
+                    return True
+
+                popped_item = candidate[curr_elem].pop(curr_event)
+
+                if self.verbose:
+                    logger.info(f"\tSubsequence: {candidate}")
+
+                if candidate not in frequent_sequences_list:
+                    """If one of the k-1 subsequences is infrequent, the
+                    candidate is pruned
+                    """
+                    if self.verbose:
+                        logger.info("\tInfrequent")
+                    return False
+
+                candidate[curr_elem].insert(curr_event, popped_item)
+            starting_event = 0
+
+        if self.verbose:
+            logger.info("\tAll contiguous subsequences are frequent")
+        return True
 
     def support_count(self):
         """Calculate support count for all k-candidates, add all frequent ones
-        to frequent_sequences"""
+        to frequent_sequences
+        """
         if self.verbose:
             logger.info("*** Calculating support count ***")
             logger.info("*** Frequent sequences found: ***")
+
+        if (self.maxgap == math.inf) and (self.mingap == 0) and (self.maxspan == math.inf):
+            is_contained = self.is_contained_without_time_constraints
+        else:
+            is_contained = self.is_contained_with_time_constraints
 
         n = len(self.db)
         for candidate in self.candidate_sequences:
             infrequent = False
             for index in list(candidate.set_of_indexes):
-                if not self.is_contained(candidate.elements, self.db[index]):
+                if not is_contained(candidate.elements, self.db[index]):
                     candidate.set_of_indexes.discard(index)
                     if len(candidate.set_of_indexes) / n < self.minsup:
                         infrequent = True
@@ -307,12 +370,12 @@ class GSP:
                 logger.info(f"Sequence: {candidate.elements}")
                 logger.info(f"Support count: {len(candidate.set_of_indexes)}")
 
-        """Keys that correspond to an empty list are removed from frequent_sequences"""
+        """Keys paired to an empty list are removed from frequent_sequences"""
         for event in list(self.frequent_sequences):
             if not self.frequent_sequences[event]:
                 del self.frequent_sequences[event]
 
-    def is_contained(self, c, s):
+    def is_contained_without_time_constraints(self, c, s):
         """Check if candidate c is contained in sequence s"""
         if self.verbose:
             logger.info(f"Checking if {c} is in {s}")
@@ -328,7 +391,74 @@ class GSP:
                     logger.info(f"Yes")
 
                 if not (c_element := next(c_iter, [])):
-                    """If next returns empty list (default value)"""
+                    """If next returns empty list (default value), all of the
+                    elements of the candidate have been found
+                    """
+                    return True
+        return False
+
+    def is_contained_with_time_constraints(self, c, s):
+        """Check if candidate c is contained in sequence s"""
+        if self.verbose:
+            logger.info(f"Checking if {c} is in {s}")
+
+        for start, s_element in enumerate(s):
+            """Check starts at first occurrence of the candidate's first element;
+            if not found, check continues from next occurrence
+            """
+            if set(c[0]).issubset(s_element):
+                """Start of ''Forward phase'' from first element"""
+                if self.verbose:
+                    logger.info(f"Found {c[0]} at index {start}")
+
+                gap = 0
+                j = 1
+                i = start + 1
+                """last_found and last_gap are used to recover information
+                about the state of the check for the previous element
+                """
+                last_found = 0
+                last_gap = 0
+
+                while i < len(s) and j < len(c):
+
+                    gap += 1
+
+                    if (i - start) > self.maxspan:
+                        """Start of ''backward phase'' for maxspan violation,
+                        check has to restart from the candidate's first
+                        element
+                        """
+                        if self.verbose:
+                            logger.info("maxspan constraint violated")
+                            break
+
+                    if gap > self.maxgap:
+                        """Start of ''backward phase'' for maxgap violation"""
+                        if self.verbose:
+                            logger.info("maxgap constraint violated")
+
+                        if j == 1:
+                            """Current element is the second one, restart search
+                            from first (outside of loop)
+                            """
+                            break
+                        j -= 1
+                        i = last_found + 1
+                        gap = last_gap
+                        continue
+
+                    if self.verbose:
+                        logger.info(f"Checking {c[j]} in {s[i]}")
+
+                    if set(c[j]).issubset(s[i]) and (gap > self.mingap):
+                        last_found = i
+                        last_gap = gap
+                        gap = 0
+                        j += 1
+                    i += 1
+
+                if j == len(c):
                     return True
         return False
 
@@ -340,7 +470,9 @@ class GSP:
 
 
 def load_db(input_filename):
-    """Return the sequence database contained in input_filename"""
+    """Return the sequence database contained in input_filename, converting
+    all events found to integers
+    """
     try:
         path = open(input_filename, 'r')
     except FileNotFoundError:

@@ -2,9 +2,11 @@
 /conversion/
 /datasets/
 /items/
+/outputs/
 /statistics/
+/statistics_old/
 /venv/
+/venv3.9/
 *.txt
 *.csv
 test.py
-/venv3.9/
