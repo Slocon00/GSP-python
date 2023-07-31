@@ -33,7 +33,7 @@ def setup_subparsers(parser):
 
     """Subparser for sequence dataset generator"""
     parser_dsgen = \
-        subparsers.add_parser('DatabaseGen', help='sequence dataset generator')
+        subparsers.add_parser('DatasetGen', help='sequence dataset generator')
     parser_dsgen.add_argument('outfile', help='output file')
     parser_dsgen.add_argument('size', type=int, help='# of sequences')
     parser_dsgen.add_argument('nevents', type=int, help='# of unique events')
