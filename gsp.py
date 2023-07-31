@@ -224,7 +224,7 @@ class GSP:
         if self.verbose:
             logger.info("*** Pruning candidates ***")
 
-        if (self.maxgap == math.inf) and (self.mingap == 0) and (self.maxspan == math.inf):
+        if self.maxgap == math.inf:
             prune = self.prune_without_time_constraints
         else:
             prune = self.prune_with_time_constraints
