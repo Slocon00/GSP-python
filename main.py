@@ -83,8 +83,14 @@ def main(argv):
         """Printing to output file"""
         for sequence_info in result:
             for element in sequence_info[0]:
+                sorted_element = []
                 for event in element:
-                    output.write(f"{int_to_str_dict[event]} ")
+                    sorted_element.append(int_to_str_dict[event])
+                sorted_element.sort()
+
+                for event in sorted_element:
+                    output.write(f"{event} ")
+
                 output.write("-1 ")
             output.write(f"#SUP: {sequence_info[1]}\n")
 
