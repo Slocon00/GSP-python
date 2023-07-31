@@ -4,17 +4,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class DatabaseGenerator:
-    """A class that represents a sequence database generator.
+class DatasetGenerator:
+    """A class that represents a sequence dataset generator.
 
-    An instance of the DatabaseGenerator class can generate a sequence database
+    An instance of the DatasetGenerator class can generate a sequence dataset
     with a specific set of parameters.
     """
 
     def __init__(self, size, nevents, maxevents, avgelems, seed=None, verbose=False):
         """Initialize an instance with the given requirements:
-            size: overall number of sequences in the database
-            nevents:    number of unique events in the database
+            size: overall number of sequences in the dataset
+            nevents:    number of unique events in the dataset
             maxevents:  max number of events contained in a single element
             avgelems:   average number of elements contained in a single sequence
             seed:       the seed to be used for random number generation (if not
@@ -45,8 +45,8 @@ class DatabaseGenerator:
         if not verbose:
             logger.disabled = True
 
-    def generate_sequence_database(self):
-        """Generate a sequence database"""
+    def generate_sequence_dataset(self):
+        """Generate a sequence dataset"""
         output = []
         for i in range(self.size):
             sequence = []
