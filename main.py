@@ -4,7 +4,7 @@ import sys
 import os.path
 import gsp
 from gsp import GSP
-from database_gen import DatabaseGenerator
+from dataset_gen import DatasetGenerator
 import logging
 
 logging.basicConfig(level=logging.NOTSET, stream=sys.stdout,
@@ -31,17 +31,17 @@ def setup_subparsers(parser):
     parser_gsp.add_argument('-v', '--verbose', action='store_true', default=False,
                             help='enable printing of debug messages')
 
-    """Subparser for sequence database generator"""
-    parser_dbgen = \
-        subparsers.add_parser('DatabaseGen', help='sequence database generator')
-    parser_dbgen.add_argument('outfile', help='output file')
-    parser_dbgen.add_argument('size', type=int, help='# of sequences')
-    parser_dbgen.add_argument('nevents', type=int, help='# of unique events')
-    parser_dbgen.add_argument('maxevents', type=int, help='max # of events in an element')
-    parser_dbgen.add_argument('avgelems', type=int, help='average # of elements in a sequence')
-    parser_dbgen.add_argument('--items', help='file specifying the items the database will contain (one per line)')
-    parser_dbgen.add_argument('-s', '--seed', help='seed for random event generation')
-    parser_dbgen.add_argument('-v', '--verbose', action='store_true',
+    """Subparser for sequence dataset generator"""
+    parser_dsgen = \
+        subparsers.add_parser('DatabaseGen', help='sequence dataset generator')
+    parser_dsgen.add_argument('outfile', help='output file')
+    parser_dsgen.add_argument('size', type=int, help='# of sequences')
+    parser_dsgen.add_argument('nevents', type=int, help='# of unique events')
+    parser_dsgen.add_argument('maxevents', type=int, help='max # of events in an element')
+    parser_dsgen.add_argument('avgelems', type=int, help='average # of elements in a sequence')
+    parser_dsgen.add_argument('--items', help='file specifying the items the dataset will contain (one per line)')
+    parser_dsgen.add_argument('-s', '--seed', help='seed for random event generation')
+    parser_dsgen.add_argument('-v', '--verbose', action='store_true',
                               help='enable printing of debug messages')
 
 
@@ -52,10 +52,10 @@ def main(argv):
     parsed_argv = parser.parse_args()
 
     if parsed_argv.subcommand == "GSP":
-        """Loading database from input file"""
-        database, int_to_str_dict, str_to_int_dict = gsp.load_db(parsed_argv.infile)
-        if not database:
-            print("Could not load database from input file")
+        """Loading dataset from input file"""
+        dataset, int_to_str_dict, str_to_int_dict = gsp.load_ds(parsed_argv.infile)
+        if not dataset:
+            print("Could not load dataset from input file")
             sys.exit(1)
 
         """Checking output file"""
@@ -76,7 +76,7 @@ def main(argv):
             sys.exit(1)
 
         """Running GSP algorithm"""
-        algo_obj = GSP(database, parsed_argv.minsup, parsed_argv.maxk, parsed_argv.t[0],
+        algo_obj = GSP(dataset, parsed_argv.minsup, parsed_argv.maxk, parsed_argv.t[0],
                        parsed_argv.t[1], parsed_argv.t[2], parsed_argv.verbose)
         result = algo_obj.run_gsp()
 
@@ -126,11 +126,11 @@ def main(argv):
                     sys.exit()
         output = open(parsed_argv.outfile, 'w')
 
-        """Generating database"""
+        """Generating dataset"""
         algo_obj = DatabaseGenerator(parsed_argv.size, parsed_argv.nevents,
                                      parsed_argv.maxevents, parsed_argv.avgelems,
                                      parsed_argv.seed, parsed_argv.verbose)
-        result = algo_obj.generate_sequence_database()
+        result = algo_obj.generate_sequence_dataset()
 
         """Printing to output file"""
         for sequence in result:
