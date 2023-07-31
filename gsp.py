@@ -9,17 +9,17 @@ logger = logging.getLogger(__name__)
 class GSP:
     """A class that implements the Generalized Sequential Pattern algorithm.
 
-    An instance of the GSP class runs the GSP algorithm on a sequence database,
-    mining all frequent sequences in the database whose support is higher or
+    An instance of the GSP class runs the GSP algorithm on a sequence dataset,
+    mining all frequent sequences in the dataset whose support is higher or
     equal than a minimum threshold.
     """
 
-    def __init__(self, db, minsup, max_k=math.inf, maxgap=math.inf, mingap=0, maxspan=math.inf, verbose=False):
-        """Initialize an instance of the class with a reference to the database
+    def __init__(self, ds, minsup, max_k=math.inf, maxgap=math.inf, mingap=0, maxspan=math.inf, verbose=False):
+        """Initialize an instance of the class with a reference to the dataset
         from which frequent sequences must be mined and a minsupport threshold,
         and maxgap/mingap/maxspan time constraints.
         """
-        self.db = db
+        self.ds = ds
         self.minsup = minsup
         self.maxgap = maxgap
         self.mingap = mingap
@@ -35,7 +35,7 @@ class GSP:
             logger.disabled = True
 
         """Find all unique events (1-sequences)"""
-        for index, sequence in enumerate(self.db):
+        for index, sequence in enumerate(self.ds):
             for element in sequence:
                 for event in element:
                     if event not in self.frequent_sequences:
@@ -51,7 +51,7 @@ class GSP:
             logger.info("*** Finding all frequent 1-sequences ***")
 
         """Find all frequent 1-sequences"""
-        n = len(self.db)
+        n = len(self.ds)
         for event in list(self.frequent_sequences):
             support_count = len(self.frequent_sequences[event][0].set_of_indexes)
             support = support_count / n
@@ -97,7 +97,7 @@ class GSP:
         for value in self.frequent_sequences.values():
             frequent_sequences_list.extend(value)
 
-        n = len(self.db)
+        n = len(self.ds)
 
         if k == 2:
             for i, sequence1 in enumerate(frequent_sequences_list):
@@ -352,11 +352,11 @@ class GSP:
         else:
             is_contained = self.is_contained_with_time_constraints
 
-        n = len(self.db)
+        n = len(self.ds)
         for candidate in self.candidate_sequences:
             infrequent = False
             for index in list(candidate.set_of_indexes):
-                if not is_contained(candidate.elements, self.db[index]):
+                if not is_contained(candidate.elements, self.ds[index]):
                     candidate.set_of_indexes.discard(index)
                     if len(candidate.set_of_indexes) / n < self.minsup:
                         infrequent = True
@@ -469,8 +469,8 @@ class GSP:
                 output.append((sequence.elements, len(sequence.set_of_indexes)))
 
 
-def load_db(input_filename):
-    """Return the sequence database contained in input_filename, converting
+def load_ds(input_filename):
+    """Return the sequence dataset contained in input_filename, converting
     all events found to integers
     """
     try:
@@ -482,7 +482,7 @@ def load_db(input_filename):
     str_to_int_dict = {}
     int_to_str_dict = {}
 
-    database = []
+    dataset = []
     sequence = []
     element = []
 
@@ -492,7 +492,7 @@ def load_db(input_filename):
         for string in line.split():
             if string == "-2":
                 """String marks end of sequence"""
-                database.append(sequence)
+                dataset.append(sequence)
                 sequence = []
                 element = []
             elif string == "-1":
@@ -509,7 +509,7 @@ def load_db(input_filename):
                 element.append(event)
 
     path.close()
-    return database, int_to_str_dict, str_to_int_dict
+    return dataset, int_to_str_dict, str_to_int_dict
 
 
 class Sequence:
@@ -518,8 +518,8 @@ class Sequence:
 
     def __init__(self, elements, set_of_indexes):
         """Initialize an instance of the class with a reference to the elements
-        of the sequence and the set of database indexes corresponding to the
-        database sequences the sequence could appear in
+        of the sequence and the set of dataset indexes corresponding to the
+        dataset sequences the sequence could appear in
         """
         self.elements = elements
         self.set_of_indexes = set_of_indexes
