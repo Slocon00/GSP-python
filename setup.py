@@ -6,13 +6,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = '0.0.6'
+VERSION = '0.0.9'
 DESCRIPTION = 'GSP Python implementation'
 LONG_DESCRIPTION = 'A Python implementation of Generalized Sequential Patterns (GSP) algorithm for sequential pattern mining'
 
 # Setting up
 setup(
-    name="gsp-python",
+    name="gsp_python",
     version=VERSION,
     author="Slocon",
     author_email="<79758160+Slocon00@users.noreply.github.com>",

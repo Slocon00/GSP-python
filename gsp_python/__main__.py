@@ -2,9 +2,9 @@ import argparse
 import math
 import sys
 import os.path
-import gsp
-from gsp import GSP
-from dataset_gen import DatasetGenerator
+from . import gsp
+from .gsp import GSP
+from .dataset_gen import DatasetGenerator
 import logging
 
 logging.basicConfig(level=logging.NOTSET, stream=sys.stdout,

@@ -10,7 +10,7 @@ The project also features a simple dataset generator.
 ### Installation
 
 ```
-python3 -m pip install gsp-python
+python3 -m pip install gsp_python
 ```
 
 ### Usage
@@ -18,13 +18,13 @@ python3 -m pip install gsp-python
 To run the gsp algorithm:
 
 ```
-python3 -m gsp-python GSP infile outfile minsup -t maxgap mingap maxspan
+python3 -m gsp_python GSP infile outfile minsup -t maxgap mingap maxspan
 ```
 
 To generate a random dataset:
 
 ```
-python3 -m gsp-python DatasetGen outfile size nevents maxevents avgelems
+python3 -m gsp_python DatasetGen outfile size nevents maxevents avgelems
 ```
 
 ---
@@ -32,13 +32,13 @@ python3 -m gsp-python DatasetGen outfile size nevents maxevents avgelems
 For more information about arguments and additional optional arguments, type:
 
 ```
-python3 -m gsp-python GSP -h
+python3 -m gsp_python GSP -h
 ```
 
 or
 
 ```
-python3 -m gsp-python DatasetGen -h
+python3 -m gsp_python DatasetGen -h
 ```
 
 ---
@@ -47,8 +47,8 @@ Alternatively, the modules can be manually imported and used in a script.
 An example is given below:
 
 ```
-from gsp_py.gsp import load_ds
-from gsp_py.gsp import GSP
+from gsp_python.gsp import load_ds
+from gsp_python.gsp import GSP
 
 dataset, {}, {} = load_ds("path/to/file.txt")
 
