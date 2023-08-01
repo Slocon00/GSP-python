@@ -10,7 +10,7 @@ The project also features a simple dataset generator.
 ### Installation
 
 ```
-python3 -m pip install gsp_py
+python3 -m pip install gsp-python
 ```
 
 ### Usage
