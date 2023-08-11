@@ -8,7 +8,7 @@ with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
 
 VERSION = '0.0.10'
 DESCRIPTION = 'GSP Python implementation'
-LONG_DESCRIPTION = 'A Python implementation of Generalized Sequential Patterns (GSP) algorithm for sequential pattern mining'
+LONG_DESCRIPTION = 'A Python implementation of the Generalized Sequential Patterns (GSP) algorithm for sequential pattern mining'
 
 # Setting up
 setup(
