@@ -47,7 +47,7 @@ def setup_subparsers(parser):
 
 def main(argv):
     """Check args and execute the algorithm with the given parameters"""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog="gsp_python")
     setup_subparsers(parser)
     parsed_argv = parser.parse_args()
 
